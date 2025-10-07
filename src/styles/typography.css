@@ -1,0 +1,168 @@
+/**
+ * Typography Utility Classes
+ * Apply consistent typography styles across components
+ */
+
+/* Display (Hero) */
+.gravity-display-1 {
+  font-size: var(--gravity-text-display-1);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-bold);
+  line-height: var(--gravity-line-height-tight);
+  letter-spacing: var(--gravity-letter-spacing-tighter);
+}
+
+.gravity-display-2 {
+  font-size: var(--gravity-text-display-2);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-semibold);
+  line-height: var(--gravity-line-height-tight);
+  letter-spacing: var(--gravity-letter-spacing-tight);
+}
+
+.gravity-display-3 {
+  font-size: var(--gravity-text-display-3);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-semibold);
+  line-height: var(--gravity-line-height-tight);
+  letter-spacing: var(--gravity-letter-spacing-tight);
+}
+
+/* Headings */
+.gravity-h1 {
+  font-size: var(--gravity-text-h1);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-semibold);
+  line-height: var(--gravity-line-height-snug);
+  letter-spacing: var(--gravity-letter-spacing-tight);
+}
+
+.gravity-h2 {
+  font-size: var(--gravity-text-h2);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-semibold);
+  line-height: var(--gravity-line-height-snug);
+  letter-spacing: var(--gravity-letter-spacing-tight);
+}
+
+.gravity-h3 {
+  font-size: var(--gravity-text-h3);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-semibold);
+  line-height: var(--gravity-line-height-snug);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-h4 {
+  font-size: var(--gravity-text-h4);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-semibold);
+  line-height: var(--gravity-line-height-snug);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-h5 {
+  font-size: var(--gravity-text-h5);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-medium);
+  line-height: var(--gravity-line-height-snug);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-h6 {
+  font-size: var(--gravity-text-h6);
+  font-family: var(--gravity-font-heading);
+  font-weight: var(--gravity-font-weight-medium);
+  line-height: var(--gravity-line-height-normal);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+/* Body Text */
+.gravity-body-xl {
+  font-size: var(--gravity-text-body-xl);
+  font-family: var(--gravity-font-body);
+  font-weight: var(--gravity-font-weight-normal);
+  line-height: var(--gravity-line-height-relaxed);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-body-lg {
+  font-size: var(--gravity-text-body-lg);
+  font-family: var(--gravity-font-body);
+  font-weight: var(--gravity-font-weight-normal);
+  line-height: var(--gravity-line-height-relaxed);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-body {
+  font-size: var(--gravity-text-body);
+  font-family: var(--gravity-font-body);
+  font-weight: var(--gravity-font-weight-normal);
+  line-height: var(--gravity-line-height-normal);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-body-sm {
+  font-size: var(--gravity-text-body-sm);
+  font-family: var(--gravity-font-body);
+  font-weight: var(--gravity-font-weight-normal);
+  line-height: var(--gravity-line-height-normal);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-body-xs {
+  font-size: var(--gravity-text-body-xs);
+  font-family: var(--gravity-font-body);
+  font-weight: var(--gravity-font-weight-medium);
+  line-height: var(--gravity-line-height-normal);
+  letter-spacing: var(--gravity-letter-spacing-wide);
+}
+
+/* Special Text Styles */
+.gravity-label {
+  font-size: var(--gravity-text-body-sm);
+  font-family: var(--gravity-font-body);
+  font-weight: var(--gravity-font-weight-medium);
+  line-height: var(--gravity-line-height-normal);
+  letter-spacing: var(--gravity-letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.gravity-caption {
+  font-size: var(--gravity-text-body-xs);
+  font-family: var(--gravity-font-body);
+  font-weight: var(--gravity-font-weight-normal);
+  line-height: var(--gravity-line-height-normal);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+.gravity-code {
+  font-size: var(--gravity-text-body-sm);
+  font-family: var(--gravity-font-mono);
+  font-weight: var(--gravity-font-weight-normal);
+  line-height: var(--gravity-line-height-normal);
+  letter-spacing: var(--gravity-letter-spacing-normal);
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  .gravity-display-1 {
+    font-size: 48px; /* Scale down on mobile */
+  }
+  
+  .gravity-display-2 {
+    font-size: 40px;
+  }
+  
+  .gravity-display-3 {
+    font-size: 36px;
+  }
+  
+  .gravity-h1 {
+    font-size: 32px;
+  }
+  
+  .gravity-h2 {
+    font-size: 28px;
+  }
+}
