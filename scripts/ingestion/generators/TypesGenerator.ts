@@ -1,0 +1,34 @@
+import type { ComponentMetadata } from "../ComponentScanner";
+import { mapControlToTsType } from "./controlTypeUtils";
+
+/**
+ * Generate util/types.ts file
+ */
+export function generateTypes(metadata: ComponentMetadata): string {
+  const propsInterface = Object.entries(metadata.argTypes)
+    .map(([key, value]: [string, any]) => {
+      const tsType = mapControlToTsType(value.control);
+      return `  ${key}?: ${tsType};`;
+    })
+    .join("\n");
+
+  return `/**
+ * ${metadata.name} Types
+ * Auto-generated from Storybook component
+ */
+
+export interface ${metadata.name}Config {
+${propsInterface}
+}
+
+export interface ${metadata.name}Output {
+  __outputs: {
+    componentSpec: any;
+  };
+}
+
+export interface ${metadata.name}Template {
+  componentUrl: string;
+}
+`;
+}

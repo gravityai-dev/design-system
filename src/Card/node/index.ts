@@ -1,67 +1,63 @@
 /**
  * Card Node Definition
- * UI Component node that generates a Card ComponentSpec
+ * Auto-generated from Storybook component
  */
 
-import { getPlatformDependencies, type EnhancedNodeDefinition } from "@gravityai-dev/plugin-base";
+import { NodeInputType, type EnhancedNodeDefinition } from "@gravityai-dev/plugin-base";
 import CardExecutor from "./executor";
+import { loadDefaultTemplate } from "../service/templates";
 
 export const NODE_TYPE = "Card";
 
-function createNodeDefinition(): EnhancedNodeDefinition {
-  const { NodeInputType } = getPlatformDependencies();
-
+export function createNodeDefinition(): EnhancedNodeDefinition {
   return {
-    packageVersion: "1.0.0",
+    packageVersion: "0.1.0",
     type: NODE_TYPE,
     name: "Card",
-    description: "Card UI component with title, description, and optional image",
+    description: "Card UI component from design system",
     category: "Design System",
     color: "#10b981",
-    logoUrl: "https://res.cloudinary.com/sonik/image/upload/v1756968888/gravity/icons/Card.png",
-    inputs: [
-      {
-        name: "data",
-        type: NodeInputType.OBJECT,
-        description: "Card data (title, description, imageUrl)",
-      },
-    ],
-    outputs: [
-      {
-        name: "componentSpec",
-        type: NodeInputType.OBJECT,
-        description: "Component specification for client rendering",
-      },
-    ],
+    template: "uiComponent",
+    componentTemplate: loadDefaultTemplate(),
+    logoUrl: "https://res.cloudinary.com/sonik/image/upload/v1751366180/gravity/icons/gravityIcon.png",
+    nodeSize: { width: 750, height: 400 },
+    inputs: [{ name: "signal", type: NodeInputType.OBJECT, description: "Signal" }],
+    outputs: [{ name: "output", type: NodeInputType.OBJECT, description: "Response object" }],
     configSchema: {
-      type: "object",
-      properties: {
-        title: {
-          type: "string",
-          title: "Title",
-          description: "Card title text",
-          "ui:field": "template",
-        },
-        description: {
-          type: "string",
-          title: "Description",
-          description: "Card description text",
-          "ui:field": "template",
-          "ui:widget": "textarea",
-        },
-        imageUrl: {
-          type: "string",
-          title: "Image URL",
-          description: "URL of the card image (optional)",
-          "ui:field": "template",
-        },
+      "type": "object",
+      "properties": {
+            "title": {
+                  "type": "string",
+                  "title": "Card title",
+                  "default": "Lightsaber Combat Training",
+                  "ui:field": "template"
+            },
+            "description": {
+                  "type": "string",
+                  "title": "Card description text",
+                  "default": "Master the seven forms of lightsaber combat with guidance from Jedi Masters.",
+                  "ui:field": "template"
+            },
+            "image": {
+                  "type": "string",
+                  "title": "URL for card image",
+                  "default": "https://res.cloudinary.com/sonik/image/upload/v1761403583/gravity/YodaPark/darth-vader-main_4560aff7.jpg",
+                  "ui:field": "template"
+            },
+            "callToAction": {
+                  "type": "string",
+                  "title": "Call to action button text",
+                  "default": "Begin Training",
+                  "ui:field": "template"
+            },
+            "object": {
+                  "type": "object",
+                  "title": "Full object with card data (title, description, imageUrl/image, cta/callToAction)",
+                  "ui:field": "template"
+            }
       },
-      required: [],
-      "ui:order": ["title", "description", "imageUrl"],
-    },
-    capabilities: {
-      isTrigger: false,
-    },
+      "required": []
+},
     credentials: [],
   };
 }
@@ -73,4 +69,4 @@ export const CardNode = {
   executor: CardExecutor,
 };
 
-export { createNodeDefinition };
+export { createNodeDefinition as default };

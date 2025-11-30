@@ -1,0 +1,237 @@
+/**
+ * Prose Styles - Markdown Content Typography
+ * Beautiful, readable styles for markdown-rendered content
+ * Uses design tokens for consistency
+ */
+
+.prose {
+  max-width: 65ch;
+  color: var(--color-gray-900);
+  font-size: var(--text-body-md);
+  line-height: var(--line-height-body);
+}
+
+.prose-sm {
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
+}
+
+.prose-lg {
+  font-size: var(--text-body-lg);
+  line-height: 1.7;
+}
+
+.max-w-none {
+  max-width: none;
+}
+
+/* Headings */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  margin-top: 1.25em;
+  margin-bottom: 0.375em;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-headline);
+  letter-spacing: var(--letter-spacing-headline);
+  color: var(--color-gray-950);
+}
+
+.prose h1 {
+  font-size: var(--text-headline-lg);
+  margin-top: 0;
+}
+
+.prose h2 {
+  font-size: var(--text-headline-md);
+  margin-top: 1em;
+}
+
+.prose h3 {
+  font-size: var(--text-headline-sm);
+  margin-top: 0.875em;
+}
+
+.prose h4 {
+  font-size: var(--text-title-lg);
+}
+
+.prose h5 {
+  font-size: var(--text-title-md);
+}
+
+.prose h6 {
+  font-size: var(--text-title-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+}
+
+/* Paragraphs */
+.prose p {
+  margin-bottom: 0.75em;
+}
+
+/* Strong/Bold */
+.prose strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-950);
+}
+
+/* Links */
+.prose a {
+  color: var(--color-primary-600);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-50);
+  border-bottom: 2px solid var(--color-primary-300);
+  transition: all var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.prose a:hover {
+  color: var(--color-primary-700);
+  background-color: var(--color-primary-100);
+  border-bottom-color: var(--color-primary-500);
+  transform: translateY(-1px);
+}
+
+/* External link icon */
+.prose a[href^="http"]::after,
+.prose a[href^="https://"]::after {
+  content: "↗";
+  font-size: 0.875em;
+  opacity: 0.7;
+}
+
+/* Inline Code */
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background-color: var(--color-gray-100);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-gray-900);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Code Blocks */
+.prose pre {
+  background-color: var(--color-gray-900);
+  color: var(--color-gray-100);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  margin: 1em 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: var(--font-weight-regular);
+}
+
+/* Lists */
+.prose ul,
+.prose ol {
+  margin: 0.75em 0;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin: 0.25rem 0;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+/* Blockquotes */
+.prose blockquote {
+  border-left: 4px solid var(--color-primary-500);
+  padding-left: var(--spacing-4);
+  margin: 1.5em 0;
+  font-style: italic;
+  color: var(--color-gray-700);
+}
+
+.prose blockquote p {
+  margin: 0;
+}
+
+/* Horizontal Rule */
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border-subtle);
+  margin: 2em 0;
+}
+
+/* Tables */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.prose th,
+.prose td {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-border-default);
+  text-align: left;
+}
+
+.prose th {
+  background-color: var(--color-gray-50);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-label-md);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-label);
+  color: var(--color-text-secondary);
+}
+
+.prose td {
+  font-size: var(--text-body-md);
+}
+
+/* Images */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-lg);
+  margin: 1em auto;
+}
+
+.prose p img {
+  margin: 0.75em auto;
+}
+
+/* Keep last element inline for cursor (but not if it contains images) */
+.prose > *:last-child {
+  display: inline;
+}
+
+.prose > *:last-child:has(img) {
+  display: block;
+}
