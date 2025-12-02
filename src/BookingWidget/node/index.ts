@@ -11,7 +11,7 @@ export const NODE_TYPE = "BookingWidget";
 
 export function createNodeDefinition(): EnhancedNodeDefinition {
   return {
-    packageVersion: "0.1.0",
+    packageVersion: "0.2.0",
     type: NODE_TYPE,
     name: "BookingWidget",
     description: "BookingWidget UI component from design system",

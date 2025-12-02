@@ -11,7 +11,7 @@ export const NODE_TYPE = "Card";
 
 export function createNodeDefinition(): EnhancedNodeDefinition {
   return {
-    packageVersion: "0.1.0",
+    packageVersion: "0.2.0",
     type: NODE_TYPE,
     name: "Card",
     description: "Card UI component from design system",

@@ -11,6 +11,7 @@ import styles from "./ChatHistoryItem.module.css";
 interface ChatHistoryItemProps {
   response: AssistantResponse;
   onQuestionClick?: (question: string) => void;
+  onComponentAction?: (actionType: string, actionData: any) => void;
 }
 
 /**
@@ -22,7 +23,7 @@ interface ChatHistoryItemProps {
  * - Passes streaming state to all child components
  * - Shows avatar with animation based on streaming state
  */
-export function ChatHistoryItem({ response, onQuestionClick }: ChatHistoryItemProps) {
+export function ChatHistoryItem({ response, onQuestionClick, onComponentAction }: ChatHistoryItemProps) {
   const { streamingState, components, timestamp } = response;
 
   // Show animation whenever workflow is streaming/running
@@ -58,6 +59,7 @@ export function ChatHistoryItem({ response, onQuestionClick }: ChatHistoryItemPr
                     chatId={chatId}
                     streamingState={streamingState}
                     onQuestionClick={onQuestionClick}
+                    onClick={(data: any) => onComponentAction?.("click", data)}
                   />
                 </div>
               );

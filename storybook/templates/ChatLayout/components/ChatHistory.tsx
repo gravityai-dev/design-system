@@ -11,17 +11,18 @@ import styles from "./ChatHistory.module.css";
 interface ChatHistoryProps {
   history: HistoryEntry[];
   onQuestionClick?: (question: string) => void;
+  onComponentAction?: (actionType: string, actionData: any) => void;
 }
 
-export function ChatHistory({ history, onQuestionClick }: ChatHistoryProps) {
+export function ChatHistory({ history, onQuestionClick, onComponentAction }: ChatHistoryProps) {
   console.log(
     "[ChatHistory] Rendering with entries:",
     history.map((e) => ({
       id: e.id,
       type: e.type,
       chatId: e.chatId,
-      componentsCount: e.type === 'assistant_response' ? e.components.length : 0,
-      streamingState: e.type === 'assistant_response' ? e.streamingState : undefined,
+      componentsCount: e.type === "assistant_response" ? e.components.length : 0,
+      streamingState: e.type === "assistant_response" ? e.streamingState : undefined,
     }))
   );
 
@@ -55,6 +56,7 @@ export function ChatHistory({ history, onQuestionClick }: ChatHistoryProps) {
               key={entry.id}
               response={entry}
               onQuestionClick={onQuestionClick}
+              onComponentAction={onComponentAction}
             />
           );
         }

@@ -1,29 +1,29 @@
 /**
  * Type definitions for ChatLayout
- * 
+ *
  * Re-exports from GravityTemplate.tsx (single source of truth)
  * All templates use the same universal types
  */
 
-import type { 
-  SessionParams, 
-  GravityClient, 
+import type {
+  SessionParams,
+  GravityClient,
   StreamingState,
   HistoryEntry,
   UserMessage,
   AssistantResponse,
-  ResponseComponent
-} from '../GravityTemplate';
+  ResponseComponent,
+} from "../GravityTemplate";
 
 // Re-export all core types from GravityTemplate
-export type { 
-  SessionParams, 
-  GravityClient, 
+export type {
+  SessionParams,
+  GravityClient,
   StreamingState,
   HistoryEntry,
   UserMessage,
   AssistantResponse,
-  ResponseComponent
+  ResponseComponent,
 };
 
 /**
