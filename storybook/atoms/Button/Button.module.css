@@ -1,12 +1,12 @@
 /* Button - Pure CSS Module */
-@import '../../styles/index.css';
+@import "../../styles/index.css";
 
 .button {
   font-family: var(--font-body);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--letter-spacing-button);
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm); /* Square-ish for SAB style */
   cursor: pointer;
   transition: all var(--transition-base);
   display: inline-flex;
@@ -26,16 +26,16 @@
 
 /* Variants */
 .primary {
-  background-color: var(--color-primary-500);
+  background-color: var(--sab-red);
   color: #ffffff;
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--color-primary-600);
+  background-color: var(--sab-red-hover);
 }
 
 .primary:active:not(:disabled) {
-  background-color: var(--color-primary-700);
+  background-color: var(--sab-red-active);
 }
 
 .secondary {
@@ -53,18 +53,18 @@
 
 .outline {
   background-color: transparent;
-  border: 2px solid var(--color-primary-500);
-  color: var(--color-primary-500);
+  border: 2px solid var(--sab-red);
+  color: var(--sab-red);
 }
 
 .outline:hover:not(:disabled) {
-  background-color: var(--color-primary-50);
-  border-color: var(--color-primary-600);
-  color: var(--color-primary-600);
+  background-color: var(--sab-red-50);
+  border-color: var(--sab-red-hover);
+  color: var(--sab-red-hover);
 }
 
 .outline:active:not(:disabled) {
-  background-color: var(--color-primary-100);
+  background-color: var(--sab-red-100);
 }
 
 /* Sizes */

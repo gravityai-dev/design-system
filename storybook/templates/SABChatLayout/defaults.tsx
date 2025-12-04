@@ -1,5 +1,6 @@
 /**
- * ChatLayout Template Defaults
+ * SABChatLayout Template Defaults
+ * Following the 3-state pattern: Initial, Streaming, Complete
  */
 
 import { createMockClients } from "../core";
@@ -25,7 +26,32 @@ export const {
 ]);
 
 // Template-specific defaults
-export const ChatLayoutDefaults = {
+export const SABChatLayoutDefaults = {
   placeholder: "Ask me anything...",
   autoScroll: true,
+  brandName: "SAB Smart Assistant",
+  brandSubtitle: "How can I help you today?",
+  logoUrl: "https://res.cloudinary.com/sonik/image/upload/v1764865338/SAB/sablogo.jpg",
+  suggestions: [
+    {
+      icon: "creditCard",
+      title: "Credit Cards",
+      question: "What credit cards do you offer?",
+    },
+    {
+      icon: "banknotes",
+      title: "Personal Loans",
+      question: "Tell me about personal loans",
+    },
+    {
+      icon: "home",
+      title: "Home Loans",
+      question: "How can I apply for a home loan?",
+    },
+    {
+      icon: "userGroup",
+      title: "Account Opening",
+      question: "How do I open a bank account?",
+    },
+  ],
 };

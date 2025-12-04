@@ -3,6 +3,19 @@ import Markdown from "markdown-to-jsx";
 import { ChunkAnimator } from "./chunkAnimator";
 import styles from "./AIResponse.module.css";
 
+// Custom link component that opens in new tab
+const ExternalLink = ({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  <a {...props} target="_blank" rel="noopener noreferrer">
+    {children}
+  </a>
+);
+
+const markdownOptions = {
+  overrides: {
+    a: { component: ExternalLink },
+  },
+};
+
 interface AIResponseProps {
   progressText?: string;
   text?: string;
@@ -45,14 +58,14 @@ export default function AIResponse(props: AIResponseProps) {
       {/* Reasoning/Thinking - rendered as markdown in italic gray */}
       {progressText && (
         <div className={styles.progress}>
-          <Markdown>{progressText}</Markdown>
+          <Markdown options={markdownOptions}>{progressText}</Markdown>
         </div>
       )}
 
       {/* Text - server sends accumulated chunks */}
       {displayedText && (
         <div className={`${styles.textContent} prose`}>
-          <Markdown>{displayedText}</Markdown>
+          <Markdown options={markdownOptions}>{displayedText}</Markdown>
           {/* Animated blinking cursor inline with text */}
           {isStreaming && <span className={styles.cursor} />}
         </div>

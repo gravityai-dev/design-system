@@ -1,5 +1,5 @@
-import type { GravityTemplateProps } from "../GravityTemplate";
+import type { GravityTemplateProps } from "../core";
 
 export interface BookingWidgetLayoutProps extends GravityTemplateProps {
-  // Template uses AIResponse component from workflow for context
+  // Template uses BookingWidget component from workflow
 }

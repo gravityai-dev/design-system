@@ -54,6 +54,14 @@
   --color-success-50: #f0fdf4;
   --color-success-500: var(--color-primary-500);
   --color-success-600: var(--color-primary-600);
+
+  /* SAB Brand Colors */
+  --sab-red: #d33131;
+  --sab-red-hover: #b82a2a;
+  --sab-red-active: #9e2424;
+  --sab-red-50: #fef2f2;
+  --sab-red-100: #fee2e2;
+  --sab-red-200: #fecaca;
 }
 
 /**

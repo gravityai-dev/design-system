@@ -1,5 +1,5 @@
 /* ChatHistory - Pure CSS Module */
-@import '../../../styles/index.css';
+@import "../../../styles/index.css";
 
 .emptyState {
   max-width: 64rem;
@@ -40,7 +40,7 @@
 }
 
 .userMessageBubble {
-  background-color: var(--color-primary-500);
+  background-color: var(--sab-red);
   color: #ffffff;
   border-radius: var(--radius-2xl);
   border-top-right-radius: var(--radius-sm);

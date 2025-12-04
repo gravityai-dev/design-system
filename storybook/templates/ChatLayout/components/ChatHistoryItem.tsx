@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import type { AssistantResponse } from "../types";
+import type { AssistantResponse, ResponseComponent } from "./types";
 import { AssistantAvatar } from "./AssistantAvatar";
 import styles from "./ChatHistoryItem.module.css";
 
@@ -44,7 +44,7 @@ export function ChatHistoryItem({ response, onQuestionClick, onComponentAction }
       <div className={styles.componentsContainer}>
         {components.length > 0 ? (
           <>
-            {components.map((component) => {
+            {components.map((component: ResponseComponent) => {
               const { Component, props, id, nodeId, chatId } = component;
 
               if (!Component) {

@@ -7,7 +7,7 @@ import { BookingWidgetTemplate } from "../util/types";
 
 export function loadDefaultTemplate(): BookingWidgetTemplate {
   return {
-    componentUrl: '/components/BookingWidget.js?v=1764647974818',
+    componentUrl: '/components/BookingWidget.js?v=1764870545771',
   };
 }
 

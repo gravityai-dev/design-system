@@ -1,5 +1,5 @@
 import React from "react";
-import { useGravityClient, renderComponent, filterComponents } from "../GravityTemplate";
+import { useGravityClient, renderComponent, filterComponents } from "../core";
 import type { BookingWidgetLayoutProps } from "./types";
 import styles from "./BookingWidgetLayout.module.css";
 

@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import type { HistoryEntry } from "../types";
+import type { HistoryEntry } from "./types";
 import { ChatHistoryItem } from "./ChatHistoryItem";
 import styles from "./ChatHistory.module.css";
 

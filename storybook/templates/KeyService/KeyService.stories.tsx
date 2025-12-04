@@ -1,11 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import KeyService from "./KeyService";
-import {
-  mockClientInitial,
-  mockClientStreaming,
-  mockClientComplete,
-  KeyServiceDefaults,
-} from "./defaults.tsx";
+import { mockClientInitial, mockClientStreaming, mockClientComplete } from "./defaults";
 
 const meta: Meta<typeof KeyService> = {
   title: "Templates/KeyService",
@@ -15,21 +10,11 @@ const meta: Meta<typeof KeyService> = {
   },
   decorators: [
     (Story) => (
-      <div style={{ height: '100vh', width: '100vw' }}>
+      <div style={{ height: "100vh", width: "100vw" }}>
         <Story />
       </div>
     ),
   ],
-  argTypes: {
-    logoUrl: {
-      control: "text",
-      description: "URL for the logo image",
-    },
-    logoLink: {
-      control: "text",
-      description: "Link URL when logo is clicked",
-    },
-  },
 };
 
 export default meta;
@@ -39,7 +24,6 @@ type Story = StoryObj<typeof KeyService>;
 export const Initial: Story = {
   args: {
     client: mockClientInitial,
-    ...KeyServiceDefaults,
   },
 };
 
@@ -47,7 +31,6 @@ export const Initial: Story = {
 export const Streaming: Story = {
   args: {
     client: mockClientStreaming,
-    ...KeyServiceDefaults,
   },
 };
 
@@ -55,6 +38,5 @@ export const Streaming: Story = {
 export const Complete: Story = {
   args: {
     client: mockClientComplete,
-    ...KeyServiceDefaults,
   },
 };

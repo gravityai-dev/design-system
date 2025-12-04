@@ -1,15 +1,15 @@
-/* Card2 - Horizontal Card with Image on Right */
-@import '../../styles/index.css';
+/* Card2 - Horizontal Card with Image on Right (SAB Style) */
+@import "../../styles/index.css";
 
 .card {
   display: flex;
   width: 100%;
-  min-height: 320px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-xl); /* 16px - larger, more modern */
+  min-height: 200px;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
   background-color: #ffffff;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   transition: all var(--transition-slow);
 }
 
@@ -46,11 +46,22 @@
   margin: 0;
 }
 
-/* Right side - Image */
+/* Right side - Image with SAB red accent bar */
 .imageContainer {
-  flex: 0.8; /* Slightly less for image */
-  min-height: 320px;
+  position: relative;
+  flex: 0.8;
+  min-height: 200px;
   overflow: hidden;
+}
+
+.imageContainer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  background-color: var(--sab-red);
 }
 
 .image {
@@ -69,7 +80,7 @@
   .card {
     flex-direction: column;
   }
-  
+
   .imageContainer {
     min-height: 200px;
     order: -1; /* Image on top for mobile */

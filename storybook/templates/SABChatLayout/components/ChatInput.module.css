@@ -1,0 +1,150 @@
+/* ChatInput - SAB Branded */
+@import "../../../styles/index.css";
+
+.container {
+  width: 100%;
+}
+
+.form {
+  width: 100%;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.icon {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  padding-left: var(--spacing-3);
+  z-index: 10;
+}
+
+.iconSvg {
+  height: 1.25rem;
+  width: 1.25rem;
+  color: var(--sab-red);
+}
+
+.input {
+  display: block;
+  width: 100%;
+  padding-left: 2.75rem;
+  padding-right: 3rem;
+  padding-top: var(--spacing-3);
+  padding-bottom: var(--spacing-3);
+  font-size: var(--text-body-md);
+  line-height: var(--line-height-body);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  background-color: var(--color-gray-50);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-gray-200);
+  transition: all var(--transition-base);
+}
+
+.input::placeholder {
+  color: var(--color-gray-500);
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--sab-red-50), var(--shadow-md);
+  border-color: var(--sab-red);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inputStreaming {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border-color: var(--sab-red);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.submitButton {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding-right: var(--spacing-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.submitButton:disabled {
+  cursor: not-allowed;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--sab-red);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinnerCircle {
+  opacity: 0.25;
+}
+
+.spinnerPath {
+  opacity: 0.75;
+}
+
+.sendIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: all var(--transition-base);
+}
+
+.sendIconDisabled {
+  color: var(--color-gray-400);
+}
+
+.sendIconEnabled {
+  color: var(--sab-red);
+}
+
+.sendIconEnabled:hover {
+  color: var(--sab-red-hover);
+}

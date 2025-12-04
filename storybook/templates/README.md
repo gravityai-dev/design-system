@@ -6,7 +6,7 @@
 
 **Templates** are layout components that receive conversation history from the `HistoryManager` and decide how to render it.
 
-All templates extend `GravityTemplate` to ensure a consistent API.
+All templates use shared utilities from `core/` for types, hooks, and helpers.
 
 **Key Distinction:**
 
@@ -14,6 +14,24 @@ All templates extend `GravityTemplate` to ensure a consistent API.
 - **Components** = UI elements (become workflow nodes, sent by AI)
 
 > 📖 **For component documentation**, see [/storybook/components/README.md](../components/README.md)
+
+## Project Structure
+
+```
+templates/
+├── core/                    # Shared library (types, hooks, helpers)
+│   ├── index.ts             # Re-exports everything
+│   ├── types.ts             # StreamingState, GravityClient, GravityTemplateProps, etc.
+│   ├── hooks.ts             # useGravityClient, useGravityTemplate
+│   ├── helpers.tsx          # filterComponents, renderComponent
+│   ├── mockClient.ts        # createMockClient, createMockClients (for Storybook)
+│   └── GravityTemplate.tsx  # Base class (optional, for class components)
+│
+├── ChatLayout/              # Chat interface template
+├── KeyService/              # Single-column content template
+├── BookingWidgetLayout/     # Booking form template
+└── README.md
+```
 
 ## Template Switching & Stacking
 
@@ -555,21 +573,15 @@ enum StreamingState {
 
 <!-- LLM: Complete step-by-step guide for creating a new template. Templates render conversation history. -->
 
-### Step 1: Define Types (Import from GravityTemplate)
+### Step 1: Define Types
 
 ```typescript
 // types.ts
-import type { HistoryEntry, GravityClient, SessionParams } from "../GravityTemplate";
+import type { GravityTemplateProps } from "../core";
 
-// Re-export core types
-export type { HistoryEntry, GravityClient, SessionParams };
-
-// Define template-specific props
-export interface MyTemplateProps {
-  client: GravityClient;
-  onStateChange?: (state: any) => void;
-  isStreaming?: boolean;
-  // ... template-specific props
+export interface MyTemplateProps extends GravityTemplateProps {
+  // Add template-specific props
+  customProp?: string;
 }
 ```
 
@@ -577,125 +589,95 @@ export interface MyTemplateProps {
 
 ```typescript
 // MyTemplate.tsx
-import { useGravityClient } from "../GravityTemplate";
+import { useGravityClient, renderComponent, filterComponents, StreamingState } from "../core";
 import type { MyTemplateProps } from "./types";
 
-export default function MyTemplate(props: MyTemplateProps) {
-  const { client } = props;
+export default function MyTemplate({ client }: MyTemplateProps) {
+  const { history } = useGravityClient(client);
 
-  // Get history and sendMessage from client
-  const { history, sendMessage } = useGravityClient(client);
+  const latest = history.filter((e) => e.type === "assistant_response").pop();
+  const components = latest?.components || [];
+  const isStreaming = latest?.streamingState === StreamingState.STREAMING;
 
   return (
     <div>
-      {history.map((entry) => {
-        // User message
-        if (entry.type === "user_message") {
-          return <div key={entry.id}>{entry.content}</div>;
-        }
-
-        // Assistant response - can contain multiple components
-        if (entry.type === "assistant_response") {
-          const { streamingState, components } = entry;
-
-          return (
-            <div key={entry.id}>
-              {/* Show animation when workflow is running */}
-              {streamingState === "streaming" && <LoadingAnimation />}
-
-              {/* Render all components in this response */}
-              {components.map((component) => {
-                const { Component, props, id, nodeId, chatId } = component;
-                if (!Component) return null;
-
-                return (
-                  <Component
-                    key={id}
-                    {...props}
-                    nodeId={nodeId}
-                    chatId={chatId}
-                    streamingState={streamingState} // Pass response state to components
-                  />
-                );
-              })}
-            </div>
-          );
-        }
-
-        return null;
-      })}
+      {isStreaming && <LoadingAnimation />}
+      {filterComponents(components, { exclude: ["image"] }).map((c) => renderComponent(c))}
     </div>
   );
 }
 ```
 
-### The Beautiful Simplicity
-
-**That's it!** Your template:
-
-- ✅ Gets `history` from `useGravityClient(client)`
-- ✅ Each response has its own `streamingState` (not global)
-- ✅ One response can contain multiple components
-- ✅ Just maps and renders - components handle their own state
-- ✅ No manual Zustand subscriptions needed
-- ✅ No complex state management
-- ✅ State changes → Components react → UI updates
-
-**Key Insight: Streaming State is Local**
-
-- Each `AssistantResponse` has its own `streamingState`
-- Multiple responses can stream simultaneously
-- Animation shows when `streamingState === 'streaming'`
-- Animation is independent of whether components have arrived
-
-### Option 2: Class Component
+### Step 3: Create Defaults (for Storybook)
 
 ```typescript
-import { GravityTemplate, GravityTemplateProps } from "../GravityTemplate";
+// defaults.tsx
+import { createMockClients } from "../core";
+import AIResponse from "../../components/AIResponse/AIResponse";
+import { AIResponseDefaults } from "../../components/AIResponse/defaults";
 
-export interface MyTemplateProps extends GravityTemplateProps {
-  customProp?: string;
-}
+export const { mockClientInitial, mockClientStreaming, mockClientComplete } = createMockClients([
+  { componentType: "AIResponse", Component: AIResponse, props: AIResponseDefaults },
+]);
 
-export default class MyTemplate extends GravityTemplate<MyTemplateProps> {
-  render() {
-    const responses = this.getResponses(); // Get assistant responses
-    const userMessages = this.getUserMessages(); // Get user messages
+export const MyTemplateDefaults = {
+  customProp: "default value",
+};
+```
 
-    return <div>{/* Your template layout */}</div>;
-  }
-}
+### Step 4: Create Stories
+
+```typescript
+// MyTemplate.stories.tsx
+import type { Meta, StoryObj } from "@storybook/react";
+import MyTemplate from "./MyTemplate";
+import { mockClientInitial, mockClientStreaming, mockClientComplete, MyTemplateDefaults } from "./defaults";
+
+const meta: Meta<typeof MyTemplate> = {
+  title: "Templates/MyTemplate",
+  component: MyTemplate,
+  parameters: { layout: "fullscreen" },
+  decorators: [
+    (Story) => (
+      <div style={{ height: "100vh" }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export default meta;
+
+export const Initial: StoryObj = { args: { client: mockClientInitial, ...MyTemplateDefaults } };
+export const Streaming: StoryObj = { args: { client: mockClientStreaming, ...MyTemplateDefaults } };
+export const Complete: StoryObj = { args: { client: mockClientComplete, ...MyTemplateDefaults } };
 ```
 
 ---
 
-## Template Patterns
+## Core Library
 
-### Pattern: Dynamic Component Rendering
-
-All templates use the **same pattern** - render components dynamically from workflow history using helper functions.
-
-**Core Concept:**
-
-- Components arrive from workflow already wrapped with Zustand
-- Use `filterComponents()` to select which components to render
-- Use `renderComponent()` to render them
-- Components auto-update as workflow streams data
-
----
-
-## Creating a Template - Simple Example
+All imports come from `../core`:
 
 ```typescript
-import { useGravityClient, renderComponent, filterComponents } from "../GravityTemplate";
+import {
+  // Types
+  StreamingState,
+  type GravityTemplateProps,
+  type GravityClient,
+  type ResponseComponent,
 
-export default function MyTemplate({ client }) {
-  const { history } = useGravityClient(client);
-  const latest = history.filter((e) => e.type === "assistant_response").pop();
-  const components = latest?.components || [];
+  // Hooks
+  useGravityClient,
+  useGravityTemplate,
 
-  return <div>{filterComponents(components, { exclude: ["image"] }).map((c) => renderComponent(c))}</div>;
-}
+  // Helpers
+  filterComponents,
+  renderComponent,
+
+  // Storybook
+  createMockClients,
+} from "../core";
 ```
 
 **That's it!** Components stream in real-time automatically.
@@ -785,29 +767,32 @@ export default function ChatLayout({ client }) {
 
 ---
 
-### KeyService - Split Layout with Ordering
+### KeyService - 2-Column with Hero
 
-Fixed layout: content on left (ordered), images on right.
+Hero image at top, 2-column grid below (content 2/3, sidebar 1/3). Uses CSS modules.
 
 ```typescript
-export default function KeyService({ client }) {
+import styles from "./KeyService.module.css";
+
+export default function KeyService({ client }: KeyServiceProps) {
   const { history } = useGravityClient(client);
   const latest = history.filter((e) => e.type === "assistant_response").pop();
   const components = latest?.components || [];
 
-  return (
-    <div className="grid lg:grid-cols-2">
-      {/* LEFT - AIResponse first, then Card, then rest */}
-      <div>
-        {filterComponents(components, {
-          include: ["airesponse", "card", "*"],
-          exclude: ["kenburnsimage"],
-          order: true,
-        }).map((c) => renderComponent(c))}
-      </div>
+  const images = filterComponents(components, { include: ["kenburnsimage"] });
+  const content = filterComponents(components, { include: ["airesponse"] });
+  const cards = filterComponents(components, { include: ["card"] });
 
-      {/* RIGHT - Images only */}
-      <div>{filterComponents(components, { include: ["kenburnsimage"] }).map((c) => renderComponent(c))}</div>
+  return (
+    <div className={styles.container}>
+      {/* Hero Banner */}
+      <div className={styles.heroBanner}>{images.slice(0, 1).map((c) => renderComponent(c))}</div>
+
+      {/* 2-Column Grid */}
+      <div className={styles.grid}>
+        <div className={styles.contentColumn}>{content.map((c) => renderComponent(c))}</div>
+        <div className={styles.sidebarColumn}>{cards.map((c) => renderComponent(c))}</div>
+      </div>
     </div>
   );
 }

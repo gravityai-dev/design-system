@@ -1,5 +1,5 @@
 /* AssistantAvatar - Pure CSS Module */
-@import '../../../styles/index.css';
+@import "../../../styles/index.css";
 
 .container {
   display: flex;
@@ -34,7 +34,7 @@
 .dot {
   width: 0.375rem;
   height: 0.375rem;
-  background-color: var(--color-primary-500);
+  background-color: var(--sab-red);
   border-radius: var(--radius-full);
 }
 
@@ -55,7 +55,8 @@
 }
 
 @keyframes waveFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
     opacity: 0.4;
   }

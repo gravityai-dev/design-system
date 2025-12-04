@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import type { HistoryEntry } from "../types";
+import type { HistoryEntry } from "./types";
 import { ChatHistoryItem } from "./ChatHistoryItem";
 import styles from "./ChatHistory.module.css";
 
@@ -20,8 +20,8 @@ export function ChatHistory({ history, onQuestionClick }: ChatHistoryProps) {
       id: e.id,
       type: e.type,
       chatId: e.chatId,
-      componentsCount: e.type === 'assistant_response' ? e.components.length : 0,
-      streamingState: e.type === 'assistant_response' ? e.streamingState : undefined,
+      componentsCount: e.type === "assistant_response" ? e.components.length : 0,
+      streamingState: e.type === "assistant_response" ? e.streamingState : undefined,
     }))
   );
 
@@ -50,13 +50,7 @@ export function ChatHistory({ history, onQuestionClick }: ChatHistoryProps) {
 
         // Assistant response - can contain multiple components
         if (entry.type === "assistant_response") {
-          return (
-            <ChatHistoryItem
-              key={entry.id}
-              response={entry}
-              onQuestionClick={onQuestionClick}
-            />
-          );
+          return <ChatHistoryItem key={entry.id} response={entry} onQuestionClick={onQuestionClick} />;
         }
 
         return null;

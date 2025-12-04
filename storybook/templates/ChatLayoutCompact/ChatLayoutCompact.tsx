@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from "react";
-import { useGravityClient, StreamingState } from "../GravityTemplate";
+import { useGravityClient, StreamingState } from "../core";
 import ChatInput from "./components/ChatInput";
 import { ChatHistory } from "./components/ChatHistory";
 import type { ChatLayoutCompactProps } from "./types";
