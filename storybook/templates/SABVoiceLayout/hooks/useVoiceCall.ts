@@ -133,15 +133,16 @@ export function useVoiceCall(options: UseVoiceCallOptions): UseVoiceCallReturn {
       // Stop playback
       audio.playback.stopAll();
 
-      // Send AUDIO_CONTROL stop command via WebSocket (not GraphQL!)
-      // This tells the server to end the existing Nova session
-      console.log("[useVoiceCall] Sending AUDIO_CONTROL stop via WebSocket");
+      // Send AUDIO_CONTROL stop command via WebSocket
+      // This tells the server to end the Nova session gracefully
+      // DO NOT use sendVoiceCallMessage - that starts a NEW workflow!
+      console.log("[useVoiceCall] Sending AUDIO_CONTROL stop via WebSocket to end Nova session");
       audio.websocket.sendControl("AUDIO_CONTROL", {
         command: "stop",
         workflowId,
       });
 
-      // Close WebSocket after sending END_CALL
+      // Close WebSocket after sending stop
       audio.websocket.disconnect();
     }
 
@@ -149,7 +150,7 @@ export function useVoiceCall(options: UseVoiceCallOptions): UseVoiceCallReturn {
     setConnectionStatus("ended");
     setIsMuted(false);
     chatIdRef.current = null;
-  }, [audio, conversationId, workflowId]);
+  }, [audio, workflowId]);
 
   // Toggle mute
   const toggleMute = useCallback(() => {

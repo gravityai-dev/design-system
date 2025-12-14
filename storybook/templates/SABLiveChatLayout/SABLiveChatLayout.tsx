@@ -51,21 +51,19 @@ export default function SABLiveChatLayout(props: SABLiveChatLayoutProps) {
   // Callback to send agent messages through server pipeline
   const handleAgentMessage = useCallback(
     (response: AssistantResponse) => {
-      console.log("[SABLiveChatLayout] Sending agent message via server:", response);
-      // Extract props from the first component
-      const componentProps = response.components?.[0]?.props || {};
-      const { content, ...otherProps } = componentProps;
-      const agentName = response.components?.[0]?.metadata?.agentName || "Agent";
       const chatId = response.chatId || `agent_${Date.now()}`;
+      const agentName = response.components?.[0]?.metadata?.agentName || "Agent";
 
-      // Send through server pipeline - server will create COMPONENT_INIT
+      // Send all components from the response
       client.sendAgentMessage({
-        content: content || "",
         chatId,
         agentName,
         source: "amazon_connect",
-        props: otherProps, // Include interactiveData and other props
-        metadata: response.components?.[0]?.metadata,
+        components: response.components.map((comp) => ({
+          type: comp.componentType,
+          props: comp.props || {},
+          metadata: comp.metadata,
+        })),
       });
     },
     [client]

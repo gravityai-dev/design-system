@@ -7,7 +7,7 @@ import { ListPickerTemplate } from "../util/types";
 
 export function loadDefaultTemplate(): ListPickerTemplate {
   return {
-    componentUrl: '/components/ListPicker.js?v=1765705394907',
+    componentUrl: '/components/ListPicker.js?v=1765723366203',
   };
 }
 

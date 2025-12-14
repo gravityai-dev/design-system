@@ -69,8 +69,13 @@ export default function SABVoiceLayout(props: SABVoiceLayoutProps) {
   // CRITICAL: User cannot be listening while assistant is speaking (mutual exclusion)
   const displayListening = (_storybook_listening || isUserSpeaking) && !displaySpeaking;
 
-  // Handle back button click - dispatch event to switch template
+  // Handle back button click - end call first, then dispatch event to switch template
   const handleBackClick = () => {
+    // End the voice call to properly terminate the Nova stream
+    if (isCallActive) {
+      endCall();
+    }
+    // Dispatch event to switch back to chat template
     window.dispatchEvent(
       new CustomEvent("gravity:action", {
         detail: {

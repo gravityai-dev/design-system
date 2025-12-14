@@ -18,12 +18,14 @@ export function createMockClient(history: (UserMessage | AssistantResponse)[] = 
       console.log("[Mock] Emit action:", type, data);
     },
     sendAgentMessage: (data: {
-      content: string;
       chatId: string;
       agentName?: string;
       source?: string;
-      props?: Record<string, any>;
-      metadata?: Record<string, any>;
+      components: Array<{
+        type: string;
+        props: Record<string, any>;
+        metadata?: Record<string, any>;
+      }>;
     }) => {
       console.log("[Mock] Send agent message:", data);
     },

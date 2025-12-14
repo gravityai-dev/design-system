@@ -102,6 +102,10 @@ function parseInteractiveContent(
  *
  * This is the key function that enables unified history - agent messages
  * look exactly like AI responses to the template.
+ *
+ * Creates separate components for each element type (AIResponse for text,
+ * ListPicker for interactive lists, etc.) so the server can stream them
+ * as independent COMPONENT_INIT events.
  */
 export function transformToAssistantResponse(acMessage: AmazonConnectMessage): AssistantResponse {
   const { displayContent, interactiveData } = parseInteractiveContent(
@@ -110,22 +114,46 @@ export function transformToAssistantResponse(acMessage: AmazonConnectMessage): A
     acMessage.ParticipantRole
   );
 
-  // Create component with agent metadata
-  const component: ResponseComponent = {
-    id: `ac-comp-${acMessage.Id}`,
-    componentType: "AIResponse",
-    props: {
-      content: displayContent,
-      // Include interactive data for components that can render it (e.g., ListPicker)
-      ...(interactiveData && { interactiveData }),
-    },
-    metadata: {
-      source: "amazon_connect",
-      participantRole: acMessage.ParticipantRole,
-      agentName: acMessage.DisplayName || "BOT",
-      originalContentType: acMessage.ContentType,
-    },
+  const components: ResponseComponent[] = [];
+  const baseMetadata = {
+    source: "amazon_connect",
+    participantRole: acMessage.ParticipantRole,
+    agentName: acMessage.DisplayName || "BOT",
+    originalContentType: acMessage.ContentType,
   };
+
+  // Always create AIResponse for text content
+  if (displayContent) {
+    components.push({
+      id: `ac-comp-${acMessage.Id}`,
+      componentType: "AIResponse",
+      props: {
+        content: displayContent,
+      },
+      metadata: baseMetadata,
+    });
+  }
+
+  // Create separate component for interactive elements
+  if (interactiveData?.type === "ListPicker") {
+    components.push({
+      id: `ac-listpicker-${acMessage.Id}`,
+      componentType: "ListPicker",
+      props: {
+        title: interactiveData.title || "",
+        subtitle: interactiveData.subtitle || "",
+        elements: interactiveData.elements || [],
+      },
+      metadata: baseMetadata,
+    });
+  } else if (interactiveData?.type === "TimePicker") {
+    components.push({
+      id: `ac-timepicker-${acMessage.Id}`,
+      componentType: "TimePicker",
+      props: interactiveData,
+      metadata: baseMetadata,
+    });
+  }
 
   // Create AssistantResponse in exact same format as AI responses
   const response: AssistantResponse = {
@@ -134,7 +162,7 @@ export function transformToAssistantResponse(acMessage: AmazonConnectMessage): A
     role: "assistant",
     streamingState: StreamingState.COMPLETE, // Agent messages are always complete
     timestamp: new Date(acMessage.AbsoluteTime).toISOString(),
-    components: [component],
+    components,
   };
 
   return response;
