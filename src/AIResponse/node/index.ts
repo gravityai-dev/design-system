@@ -11,7 +11,7 @@ export const NODE_TYPE = "AIResponse";
 
 export function createNodeDefinition(): EnhancedNodeDefinition {
   return {
-    packageVersion: "1.0.0",
+    packageVersion: "0.2.4",
     type: NODE_TYPE,
     name: "AIResponse",
     description: "AIResponse UI component from design system",

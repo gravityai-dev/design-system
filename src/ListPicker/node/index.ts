@@ -11,7 +11,7 @@ export const NODE_TYPE = "ListPicker";
 
 export function createNodeDefinition(): EnhancedNodeDefinition {
   return {
-    packageVersion: "1.0.0",
+    packageVersion: "0.2.4",
     type: NODE_TYPE,
     name: "ListPicker",
     description: "ListPicker UI component from design system",
