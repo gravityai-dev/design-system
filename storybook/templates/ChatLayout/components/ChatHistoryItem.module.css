@@ -1,5 +1,5 @@
 /* ChatHistoryItem - Pure CSS Module */
-@import '../../../styles/index.css';
+@import "../../../styles/index.css";
 
 .container {
   display: flex;
@@ -9,6 +9,8 @@
 
 .componentsContainer {
   flex: 1;
+  /* Balance the avatar width on the left with padding on the right */
+  padding-right: calc(2rem + var(--spacing-3));
 }
 
 .componentsContainer > * + * {

@@ -2,14 +2,16 @@
 @import "../../styles/index.css";
 
 .container {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   padding: var(--spacing-8);
   background-color: var(--color-gray-100);
   font-family: var(--font-sans);
+  box-sizing: border-box;
 }
 
 .chatWindow {
@@ -17,7 +19,6 @@
   flex-direction: column;
   width: 100%;
   max-width: 64rem;
-  height: 100%;
   background-color: #ffffff;
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);

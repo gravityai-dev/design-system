@@ -6,6 +6,7 @@
 import React from "react";
 import type { AssistantResponse, ResponseComponent } from "./types";
 import { AssistantAvatar } from "./AssistantAvatar";
+import { renderComponent } from "../../core";
 import styles from "./ChatHistoryItem.module.css";
 
 interface ChatHistoryItemProps {
@@ -45,22 +46,22 @@ export function ChatHistoryItem({ response, onQuestionClick, onComponentAction }
         {components.length > 0 ? (
           <>
             {components.map((component: ResponseComponent) => {
-              const { Component, props, id, nodeId, chatId } = component;
+              const { Component, id } = component;
 
+              // Component must be loaded in history - no fallback
               if (!Component) {
+                console.warn("[ChatHistoryItem] Component not loaded for:", id, component.componentType);
                 return null;
               }
 
               return (
                 <div key={id}>
-                  <Component
-                    {...props}
-                    nodeId={nodeId}
-                    chatId={chatId}
-                    streamingState={streamingState}
-                    onQuestionClick={onQuestionClick}
-                    onClick={(data: any) => onComponentAction?.("click", data)}
-                  />
+                  {/* Render component from history using core helper */}
+                  {renderComponent(component, {
+                    streamingState,
+                    onQuestionClick,
+                    onClick: (data: any) => onComponentAction?.("click", data),
+                  })}
                 </div>
               );
             })}

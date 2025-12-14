@@ -71,21 +71,81 @@ export interface SessionParams {
  * Client context - everything templates need from the client
  */
 export interface GravityClient {
+  /** Send a message to the workflow - handles history + server communication */
+  sendMessage: (message: string, options?: { targetTriggerNode?: string }) => void;
+
+  /** Send an agent message through server pipeline (for live agent, Amazon Connect, etc.) */
+  sendAgentMessage: (data: {
+    content: string;
+    chatId: string;
+    agentName?: string;
+    source?: string;
+    props?: Record<string, any>;
+    metadata?: Record<string, any>;
+  }) => void;
+
+  /** Emit a custom action event (for cross-boundary communication) */
+  emitAction: (type: string, data: any) => void;
+
+  /** Send a voice call control message (START_CALL or END_CALL) */
+  sendVoiceCallMessage?: (data: {
+    message: string;
+    userId: string;
+    chatId: string;
+    conversationId: string;
+    workflowId: string;
+    targetTriggerNode: string;
+    action: "START_CALL" | "END_CALL";
+  }) => Promise<void>;
+
+  /** History for rendering (read-only) */
   history: {
     entries: HistoryEntry[];
-    addUserMessage: (message: string, metadata?: any) => UserMessage;
-    addResponse: (responseData?: Partial<AssistantResponse>) => AssistantResponse;
-    updateResponse: (id: string, updates: Partial<AssistantResponse>) => AssistantResponse | null;
-    addComponentToResponse: (responseId: string, componentData: any, loadedComponent?: any) => AssistantResponse | null;
     getResponses: () => AssistantResponse[];
-    // Backward compatibility - deprecated
-    addComponent?: (componentData: any, loadedComponent?: any) => AssistantResponse;
-    updateEntry?: (id: string, updates: any) => HistoryEntry | null;
   };
-  websocket: {
-    sendUserAction: (action: string, data: any) => void;
-  };
+
+  /** Session context */
   session: SessionParams;
+
+  /** WebSocket URL for audio connections (e.g., ws://localhost:4100) */
+  wsUrl?: string;
+
+  /** Audio utilities for voice calls */
+  audio?: {
+    /** Microphone capture with VAD */
+    capture: {
+      startCapture: () => Promise<{ success: boolean; reason?: string }>;
+      stopCapture: () => Promise<{ success: boolean; reason?: string }>;
+      isCapturing: boolean;
+      /** Whether user is currently speaking (VAD detected speech) */
+      isSpeaking: boolean;
+      isLoading: boolean;
+      error: string | null;
+    };
+    /** Whether assistant is currently speaking (from SPEECH_STARTED/SPEECH_ENDED events) */
+    isAssistantSpeaking: boolean;
+    /** Audio playback */
+    playback: {
+      playAudio: (audioData: ArrayBuffer) => void;
+      stopAll: () => void;
+      isPlaying: boolean;
+    };
+    /** WebSocket for audio streaming */
+    websocket: {
+      connect: () => Promise<void>;
+      disconnect: () => void;
+      sendAudio: (audioData: ArrayBuffer) => void;
+      sendControl: (type: string, data?: Record<string, any>) => void;
+      isConnected: boolean;
+    };
+    /** Subscribe to audio state changes (SESSION_READY, SPEECH_STARTED, etc.) */
+    onAudioState?: (callback: (event: { state: string; metadata?: Record<string, any> }) => void) => () => void;
+    /** Wait for a specific audio state (e.g., SESSION_READY before starting mic) */
+    waitForState?: (
+      targetState: string,
+      timeoutMs?: number
+    ) => Promise<{ state: string; metadata?: Record<string, any> }>;
+  };
 }
 
 /**

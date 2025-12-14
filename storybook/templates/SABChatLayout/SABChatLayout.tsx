@@ -3,55 +3,38 @@
  * Inspired by ADCB's home view with centered window and suggestion cards
  */
 
-import React, { useEffect, useRef, useMemo } from "react";
-import { useGravityClient, StreamingState } from "../core";
-import ChatInput from "./components/ChatInput";
+import React, { useEffect, useRef, useMemo, useCallback } from "react";
+import { StreamingState } from "../core";
+import ChatInput from "../../components/ChatInput";
 import { ChatHistory } from "../ChatLayout/components/ChatHistory";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import type { SABChatLayoutProps } from "./types";
 import styles from "./SABChatLayout.module.css";
-
-// SAB Logo URL
-const SAB_LOGO_URL = "https://res.cloudinary.com/sonik/image/upload/v1764865338/SAB/sablogo.jpg";
-
-// Default banking suggestions
-const defaultSuggestions = [
-  {
-    icon: "creditCard",
-    title: "Credit Cards",
-    question: "What credit cards do you offer?",
-  },
-  {
-    icon: "banknotes",
-    title: "Personal Loans",
-    question: "Tell me about personal loans",
-  },
-  {
-    icon: "home",
-    title: "Home Loans",
-    question: "How can I apply for a home loan?",
-  },
-  {
-    icon: "userGroup",
-    title: "Account Opening",
-    question: "How do I open a bank account?",
-  },
-];
+import { SABChatLayoutDefaults } from "./defaults";
 
 export default function SABChatLayout(props: SABChatLayoutProps) {
   const {
     client,
     onStateChange,
-    placeholder = "Ask me anything...",
-    autoScroll = true,
-    brandName = "SAB Smart Assistant",
-    brandSubtitle = "How can I help you today?",
-    logoUrl = SAB_LOGO_URL,
-    suggestions = defaultSuggestions,
+    placeholder = SABChatLayoutDefaults.placeholder,
+    autoScroll = SABChatLayoutDefaults.autoScroll,
+    brandName = SABChatLayoutDefaults.brandName,
+    brandSubtitle = SABChatLayoutDefaults.brandSubtitle,
+    logoUrl = SABChatLayoutDefaults.logoUrl,
+    suggestions = SABChatLayoutDefaults.suggestions,
   } = props;
 
-  // Use universal Gravity client hook
-  const { history, sendMessage } = useGravityClient(client, onStateChange);
+  // Access history and sendMessage directly from client
+  const history = client.history.entries;
+
+  // Wrap sendMessage to also trigger streaming state
+  const sendMessage = useCallback(
+    (message: string) => {
+      onStateChange?.({ isStreaming: true });
+      client.sendMessage(message);
+    },
+    [client, onStateChange]
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -124,7 +107,7 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
 
         {/* Input area */}
         <div className={styles.inputArea}>
-          <ChatInput placeholder={placeholder} onSend={sendMessage} disabled={isStreaming} />
+          <ChatInput placeholder={placeholder} onSend={sendMessage} disabled={isStreaming} enableAudio={true} />
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { useGravityClient, renderComponent, filterComponents, StreamingState } from "../core";
+import { renderComponent, filterComponents, StreamingState } from "../core";
 import type { KeyServiceProps } from "./types";
 import styles from "./KeyService.module.css";
 
@@ -36,7 +36,7 @@ const CardSkeleton = () => (
  */
 export default function KeyService(props: KeyServiceProps) {
   const { client } = props;
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
 
   const latest = history.filter((e) => e.type === "assistant_response").pop();
   const components = latest?.components || [];

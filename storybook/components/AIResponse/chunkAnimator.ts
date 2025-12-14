@@ -28,23 +28,23 @@ export class ChunkAnimator {
   addChunk(text: any): void {
     // Handle string input (accumulated text from server)
     const newText = typeof text === "string" ? text : text?.text || "";
-    
+
     if (!newText) return;
-    
+
     // Check if this is a duplicate of the last received text
     if (newText === this.lastReceivedText) {
       // Silently ignore duplicates
       return;
     }
-    
+
     this.lastReceivedText = newText;
-    
+
     // Cancel any ongoing animation
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
-    
+
     // Start animating to the new text
     this.animateToText(newText);
   }
@@ -55,18 +55,25 @@ export class ChunkAnimator {
   private animateToText(targetText: string): void {
     const startLength = this.displayedText.length;
     const targetLength = targetText.length;
-    
+
     // If target is shorter or same, just update immediately
     if (targetLength <= startLength) {
       this.displayedText = targetText;
       this.config.onUpdate(this.displayedText);
       return;
     }
-    
+
     this.isAnimating = true;
     this.config.onTypingChange(true);
-    
-    let currentPos = startLength;
+
+    // IMPORTANT: Show first character immediately to prevent flash
+    // Without this, there's a 1-frame delay where nothing is displayed
+    if (startLength === 0 && targetLength > 0) {
+      this.displayedText = targetText.slice(0, 1);
+      this.config.onUpdate(this.displayedText);
+    }
+
+    let currentPos = Math.max(startLength, 1); // Start from at least 1 if we showed first char
     const msPerChar = 1000 / this.config.charsPerSecond;
     let lastUpdate = 0;
 
@@ -76,7 +83,7 @@ export class ChunkAnimator {
       }
 
       const elapsed = timestamp - lastUpdate;
-      const targetPos = Math.min(startLength + Math.floor(elapsed / msPerChar), targetLength);
+      const targetPos = Math.min(currentPos + Math.floor(elapsed / msPerChar), targetLength);
 
       // Add characters from current position to target position
       if (targetPos > currentPos) {
@@ -97,6 +104,13 @@ export class ChunkAnimator {
     };
 
     this.animationFrameId = requestAnimationFrame(animate);
+  }
+
+  /**
+   * Set displayed text directly (for syncing with React state)
+   */
+  setDisplayedText(text: string): void {
+    this.displayedText = text;
   }
 
   /**

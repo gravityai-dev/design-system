@@ -11,49 +11,25 @@ import type { UserMessage, AssistantResponse, ResponseComponent, GravityClient }
  */
 export function createMockClient(history: (UserMessage | AssistantResponse)[] = []): GravityClient {
   return {
+    sendMessage: (message: string, options?: { targetTriggerNode?: string }) => {
+      console.log("[Mock] Send message:", message, options);
+    },
+    emitAction: (type: string, data: any) => {
+      console.log("[Mock] Emit action:", type, data);
+    },
+    sendAgentMessage: (data: {
+      content: string;
+      chatId: string;
+      agentName?: string;
+      source?: string;
+      props?: Record<string, any>;
+      metadata?: Record<string, any>;
+    }) => {
+      console.log("[Mock] Send agent message:", data);
+    },
     history: {
       entries: history,
-      addUserMessage: (message: string, metadata?: any): UserMessage => {
-        console.log("[Mock] Add user message:", message, metadata);
-        return {
-          id: `msg-${Date.now()}`,
-          type: "user_message" as const,
-          role: "user" as const,
-          content: message,
-          chatId: `chat-${Date.now()}`,
-          timestamp: new Date().toISOString(),
-        };
-      },
-      addResponse: (responseData?: any): AssistantResponse => {
-        console.log("[Mock] Add response:", responseData);
-        return {
-          id: `resp-${Date.now()}`,
-          type: "assistant_response" as const,
-          role: "assistant" as const,
-          streamingState: responseData?.streamingState || StreamingState.STREAMING,
-          components: responseData?.components || [],
-          chatId: responseData?.chatId,
-          timestamp: new Date().toISOString(),
-        };
-      },
-      updateResponse: (id: string, updates: any): AssistantResponse | null => {
-        console.log("[Mock] Update response:", id, updates);
-        return null;
-      },
-      addComponentToResponse: (
-        responseId: string,
-        componentData: any,
-        loadedComponent?: any
-      ): AssistantResponse | null => {
-        console.log("[Mock] Add component to response:", responseId, componentData);
-        return null;
-      },
       getResponses: () => history.filter((e) => e.type === "assistant_response") as AssistantResponse[],
-    },
-    websocket: {
-      sendUserAction: (action: string, data: any) => {
-        console.log("[Mock] Send action:", action, data);
-      },
     },
     session: {
       conversationId: "story-conv-123",
@@ -73,6 +49,8 @@ export interface MockComponent {
   Component: any;
   props: Record<string, any>;
   nodeId?: string;
+  /** Optional metadata (e.g., for Amazon Connect messages) */
+  metadata?: Record<string, any>;
 }
 
 /**
@@ -113,6 +91,7 @@ export function createMockClients(completeComponents: MockComponent[]) {
         nodeId: c.nodeId || c.componentType.toLowerCase(),
         props: c.props,
         Component: c.Component,
+        metadata: c.metadata,
       })),
       timestamp: new Date().toISOString(),
     },

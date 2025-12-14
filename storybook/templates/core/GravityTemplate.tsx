@@ -8,7 +8,7 @@ import type { GravityTemplateProps, HistoryEntry, UserMessage, AssistantResponse
 
 /**
  * Base GravityTemplate component (class-based)
- * For functional templates, use useGravityClient hook instead
+ * For functional templates, use client.sendMessage() and client.history.entries directly
  */
 export abstract class GravityTemplate<
   P extends GravityTemplateProps = GravityTemplateProps

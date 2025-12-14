@@ -23,6 +23,15 @@ export function ChatHistory({ history, onQuestionClick, onComponentAction }: Cha
       chatId: e.chatId,
       componentsCount: e.type === "assistant_response" ? e.components.length : 0,
       streamingState: e.type === "assistant_response" ? e.streamingState : undefined,
+      // Check if Component is defined for each component
+      componentsWithComponent:
+        e.type === "assistant_response"
+          ? e.components.map((c: any) => ({
+              id: c.id,
+              hasComponent: !!c.Component,
+              componentType: c.componentType,
+            }))
+          : [],
     }))
   );
 

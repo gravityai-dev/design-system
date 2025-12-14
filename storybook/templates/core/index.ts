@@ -16,7 +16,7 @@ export {
 } from "./types";
 
 // Hooks
-export { useGravityClient, useGravityTemplate } from "./hooks";
+export { useGravityTemplate } from "./hooks";
 
 // Helpers
 export { isComponentType, filterComponents, renderComponent } from "./helpers";

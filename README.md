@@ -158,11 +158,33 @@ npm run generate-nodes
 
 ## How It Works
 
-**Build:** Vite bundles React component → `dist/components/Card.js` (CSS included)  
-**Runtime:** Server sends `{ componentUrl: "/components/Card.js", props: {...} }`  
-**Client:** Loads component via `<script>`, renders with props
+### Templates (Layout Containers)
 
-**Benefits:** 10x smaller payload, browser caching, full React features, auto-styled
+Templates are **loaded by URL** - the client fetches the JS bundle and renders it directly.
+
+```
+Client → HTTP GET /components/ChatLayout.js → Render template
+```
+
+### Components (AI-Streamable)
+
+Components are **streamed via WebSocket** to the shared client history, then rendered by the active template.
+
+```
+1. Server sends COMPONENT_INIT via WebSocket: { componentUrl, props }
+2. Client loads component JS from componentUrl
+3. Client stores component in shared history (with loaded Component reference)
+4. Template renders from history
+```
+
+**Key Architecture:**
+
+- **History is the universal truth** - all components live in shared history
+- **History persists across template switches** - components don't disappear
+- **Templates read from history** - they render what's there, they don't own components
+- **Any template can render any component** - because history is universal
+
+**Benefits:** 10x smaller payload, browser caching, full React features, auto-styled, universal history
 
 ## Component Structure
 
@@ -941,19 +963,38 @@ Templates are **layout components** that receive conversation history and decide
 All templates MUST extend `GravityTemplateProps`:
 
 ```typescript
-// From GravityTemplate.tsx
+// From core/types.ts
 interface GravityTemplateProps {
-  /** Full conversation history from HistoryManager */
-  history: HistoryEntry[];
+  /** Client context with all utilities */
+  client: {
+    /** Send a message to the workflow */
+    sendMessage: (message: string, options?: { targetTriggerNode?: string }) => void;
 
-  /** Callback when user sends message */
-  onSend?: (message: string) => void;
+    /** Send agent message through server pipeline (Amazon Connect, etc.) */
+    sendAgentMessage: (data: {
+      content: string;
+      chatId: string;
+      agentName?: string;
+      source?: string;
+      props?: Record<string, any>;
+      metadata?: Record<string, any>;
+    }) => void;
 
-  /** Streaming state */
-  isStreaming?: boolean;
+    /** Emit custom action for cross-boundary communication */
+    emitAction: (type: string, data: any) => void;
 
-  /** Current streaming component name */
-  streamingComponent?: string | null;
+    /** History for rendering (read-only) */
+    history: {
+      entries: HistoryEntry[];
+      getResponses: () => AssistantResponse[];
+    };
+
+    /** Session context */
+    session: SessionParams;
+  };
+
+  /** Callback: Template shares state back to client */
+  onStateChange?: (state: { streamingState?: StreamingState; [key: string]: any }) => void;
 
   /** Template-specific props */
   [key: string]: any;
@@ -987,9 +1028,9 @@ interface HistoryEntry {
 
 ```tsx
 // /storybook/templates/ChatLayout/ChatLayout.tsx
-import React, { useEffect, useRef } from "react";
-import { useGravityTemplate } from "../GravityTemplate";
-import type { GravityTemplateProps } from "../GravityTemplate";
+import React, { useEffect, useRef, useCallback } from "react";
+import type { GravityTemplateProps } from "../core";
+import { renderComponent } from "../core";
 
 export interface ChatLayoutProps extends GravityTemplateProps {
   placeholder?: string;
@@ -997,11 +1038,22 @@ export interface ChatLayoutProps extends GravityTemplateProps {
 }
 
 export default function ChatLayout(props: ChatLayoutProps) {
-  const { history, onSend, isStreaming, placeholder, autoScroll } = props;
-  const { renderComponent } = useGravityTemplate(history);
+  const { client, onStateChange, placeholder, autoScroll } = props;
+
+  // Access history from client
+  const history = client.history.entries;
 
   // Template-specific state
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Wrap sendMessage to notify parent of streaming state
+  const handleSend = useCallback(
+    (message: string) => {
+      onStateChange?.({ isStreaming: true });
+      client.sendMessage(message);
+    },
+    [client, onStateChange]
+  );
 
   // Template-specific logic (auto-scroll)
   useEffect(() => {
@@ -1026,13 +1078,13 @@ export default function ChatLayout(props: ChatLayoutProps) {
             );
           }
 
-          // AI component - on left
-          if (entry.type === "component") {
-            return (
-              <div key={entry.id} className="flex justify-start">
-                {renderComponent(entry)}
+          // Assistant response - render components
+          if (entry.type === "assistant_response") {
+            return entry.components.map((component) => (
+              <div key={component.id} className="flex justify-start">
+                {renderComponent(component)}
               </div>
-            );
+            ));
           }
         })}
         <div ref={messagesEndRef} />
@@ -1043,10 +1095,9 @@ export default function ChatLayout(props: ChatLayoutProps) {
         <input
           type="text"
           placeholder={placeholder}
-          disabled={isStreaming}
           onKeyDown={(e) => {
             if (e.key === "Enter" && e.currentTarget.value.trim()) {
-              onSend?.(e.currentTarget.value.trim());
+              handleSend(e.currentTarget.value.trim());
               e.currentTarget.value = "";
             }
           }}

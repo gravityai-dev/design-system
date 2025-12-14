@@ -17,7 +17,8 @@ interface AssistantAvatarProps {
   showAnimation?: boolean;
 }
 
-const DEFAULT_AVATAR_URL = "https://res.cloudinary.com/sonik/image/upload/v1742546227/BookSwipe/girl.jpg";
+const DEFAULT_AVATAR_URL =
+  "https://res.cloudinary.com/sonik/image/upload/v1734332867/sixflags/uxgtoiaxezsfzueh5xkn.jpg";
 
 /**
  * AssistantAvatar - Renders AI avatar with optional content and streaming state

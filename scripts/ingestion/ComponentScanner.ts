@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as ts from 'typescript';
+import * as fs from "fs";
+import * as path from "path";
+import * as ts from "typescript";
 
 export interface ComponentMetadata {
   name: string;
@@ -20,7 +20,7 @@ export class ComponentScanner {
 
   /**
    * Scan components folder and extract metadata from stories
-   * 
+   *
    * NOTE: This only scans /storybook/components/ directory.
    * Templates in /storybook/templates/ are NOT scanned because they are
    * layout containers (like ChatLayout) that should NOT be generated as
@@ -78,6 +78,9 @@ export class ComponentScanner {
       const workflowSize = this.extractWorkflowSizeFromSource(code);
 
       if (!argTypes || Object.keys(argTypes).length === 0) {
+        console.warn(
+          `⚠️  [ComponentScanner] SKIPPING "${name}" - no argTypes found in stories file. Add argTypes to include this template in the build.`
+        );
         return null;
       }
 
@@ -169,14 +172,14 @@ export class ComponentScanner {
             }
           } else if (key === "options" && ts.isArrayLiteralExpression(value)) {
             // Extract options array
-            if (!result.control || typeof result.control === 'string') {
-              result.control = { type: 'select' };
+            if (!result.control || typeof result.control === "string") {
+              result.control = { type: "select" };
             }
             result.control.options = value.elements.map((el) => {
               if (ts.isStringLiteral(el)) {
                 return el.text;
               }
-              return el.getText().replace(/['"]/g, '');
+              return el.getText().replace(/['"]/g, "");
             });
           } else if (key === "description" && ts.isStringLiteral(value)) {
             result.description = value.text;
@@ -200,25 +203,22 @@ export class ComponentScanner {
    * Supports both inline DEFAULT_DATA and imported defaults (e.g., AIResponseDefaults)
    */
   private extractStoryDefaultsFromSource(code: string, componentDir: string): Record<string, any> | undefined {
-    const sourceFile = ts.createSourceFile(
-      'temp.ts',
-      code,
-      ts.ScriptTarget.Latest,
-      true
-    );
-    
+    const sourceFile = ts.createSourceFile("temp.ts", code, ts.ScriptTarget.Latest, true);
+
     let defaultData: Record<string, any> | undefined;
     let importedDefaultsName: string | undefined;
-    
+
     // First pass: Find imported defaults from "./defaults" file
     const findImports = (node: ts.Node) => {
       if (ts.isImportDeclaration(node)) {
         const importClause = node.importClause;
         const moduleSpecifier = node.moduleSpecifier;
-        
+
         // Check if importing from "./defaults"
-        if (ts.isStringLiteral(moduleSpecifier) && 
-            (moduleSpecifier.text === './defaults' || moduleSpecifier.text === './defaults.ts')) {
+        if (
+          ts.isStringLiteral(moduleSpecifier) &&
+          (moduleSpecifier.text === "./defaults" || moduleSpecifier.text === "./defaults.ts")
+        ) {
           if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
             importClause.namedBindings.elements.forEach((element) => {
               const name = element.name.text;
@@ -232,57 +232,53 @@ export class ComponentScanner {
       }
       ts.forEachChild(node, findImports);
     };
-    
+
     findImports(sourceFile);
-    
+
     // Second pass: Find DEFAULT_DATA constant or Default story args
     const visit = (node: ts.Node) => {
       // Look for inline DEFAULT_DATA constant
       if (ts.isVariableStatement(node)) {
         node.declarationList.declarations.forEach((declaration) => {
-          if (ts.isIdentifier(declaration.name) && declaration.name.text === 'DEFAULT_DATA') {
+          if (ts.isIdentifier(declaration.name) && declaration.name.text === "DEFAULT_DATA") {
             if (declaration.initializer && ts.isObjectLiteralExpression(declaration.initializer)) {
               defaultData = this.parseObjectLiteral(declaration.initializer);
             }
           }
         });
       }
-      
+
       // Look for Default story using imported defaults (e.g., args: AIResponseDefaults or args: { bookingData: defaultBookingData })
       if (!defaultData && importedDefaultsName && ts.isVariableStatement(node)) {
         node.declarationList.declarations.forEach((declaration) => {
-          if (ts.isIdentifier(declaration.name) && declaration.name.text === 'Default') {
+          if (ts.isIdentifier(declaration.name) && declaration.name.text === "Default") {
             if (declaration.initializer && ts.isObjectLiteralExpression(declaration.initializer)) {
               // Look for args property
               declaration.initializer.properties.forEach((prop) => {
-                if (ts.isPropertyAssignment(prop) && 
-                    ts.isIdentifier(prop.name) && 
-                    prop.name.text === 'args') {
-                  
+                if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name) && prop.name.text === "args") {
                   // Case 1: args: ImportedDefaultsName (direct reference)
-                  if (ts.isIdentifier(prop.initializer) &&
-                      prop.initializer.text === importedDefaultsName) {
-                    const defaultsPath = path.join(componentDir, 'defaults.ts');
+                  if (ts.isIdentifier(prop.initializer) && prop.initializer.text === importedDefaultsName) {
+                    const defaultsPath = path.join(componentDir, "defaults.ts");
                     if (fs.existsSync(defaultsPath)) {
-                      const defaultsCode = fs.readFileSync(defaultsPath, 'utf-8');
+                      const defaultsCode = fs.readFileSync(defaultsPath, "utf-8");
                       defaultData = this.extractDefaultsFromFile(defaultsCode, importedDefaultsName);
                     }
                   }
-                  
+
                   // Case 2: args: { propName: importedDefault, ... } (object literal with imported values)
                   else if (ts.isObjectLiteralExpression(prop.initializer)) {
                     const argsObject: Record<string, any> = {};
                     prop.initializer.properties.forEach((argProp) => {
                       if (ts.isPropertyAssignment(argProp) && ts.isIdentifier(argProp.name)) {
                         const propName = argProp.name.text;
-                        
+
                         // Check if value is an imported default
                         if (ts.isIdentifier(argProp.initializer)) {
                           const valueName = argProp.initializer.text;
                           // Load the imported default from defaults.ts
-                          const defaultsPath = path.join(componentDir, 'defaults.ts');
+                          const defaultsPath = path.join(componentDir, "defaults.ts");
                           if (fs.existsSync(defaultsPath)) {
-                            const defaultsCode = fs.readFileSync(defaultsPath, 'utf-8');
+                            const defaultsCode = fs.readFileSync(defaultsPath, "utf-8");
                             const importedValue = this.extractDefaultsFromFile(defaultsCode, valueName);
                             if (importedValue) {
                               argsObject[propName] = importedValue;
@@ -307,27 +303,22 @@ export class ComponentScanner {
           }
         });
       }
-      
+
       ts.forEachChild(node, visit);
     };
-    
+
     visit(sourceFile);
     return defaultData;
   }
-  
+
   /**
    * Extract defaults from a defaults.ts file
    */
   private extractDefaultsFromFile(code: string, exportName: string): Record<string, any> | undefined {
-    const sourceFile = ts.createSourceFile(
-      'defaults.ts',
-      code,
-      ts.ScriptTarget.Latest,
-      true
-    );
-    
+    const sourceFile = ts.createSourceFile("defaults.ts", code, ts.ScriptTarget.Latest, true);
+
     let defaults: Record<string, any> | undefined;
-    
+
     const visit = (node: ts.Node) => {
       if (ts.isVariableStatement(node)) {
         node.declarationList.declarations.forEach((declaration) => {
@@ -340,17 +331,17 @@ export class ComponentScanner {
       }
       ts.forEachChild(node, visit);
     };
-    
+
     visit(sourceFile);
     return defaults;
   }
-  
+
   /**
    * Parse TypeScript ObjectLiteralExpression to plain object
    */
   private parseObjectLiteral(node: ts.ObjectLiteralExpression): Record<string, any> {
     const result: Record<string, any> = {};
-    
+
     node.properties.forEach((prop) => {
       if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
         const name = prop.name.text;
@@ -360,10 +351,10 @@ export class ComponentScanner {
         }
       }
     });
-    
+
     return result;
   }
-  
+
   /**
    * Parse TypeScript expression to JavaScript value
    */
@@ -424,7 +415,7 @@ export class ComponentScanner {
                     ts.isObjectLiteralExpression(paramProp.initializer)
                   ) {
                     const sizeObj = this.parseObjectLiteral(paramProp.initializer);
-                    if (sizeObj && typeof sizeObj.width === 'number' && typeof sizeObj.height === 'number') {
+                    if (sizeObj && typeof sizeObj.width === "number" && typeof sizeObj.height === "number") {
                       workflowSize = { width: sizeObj.width, height: sizeObj.height };
                     }
                   }

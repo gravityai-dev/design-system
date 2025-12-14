@@ -35,8 +35,8 @@ export const SABChatLayoutDefaults = {
   suggestions: [
     {
       icon: "creditCard",
-      title: "Credit Cards",
-      question: "What credit cards do you offer?",
+      title: "Travel Cards",
+      question: "What card is best for travel?",
     },
     {
       icon: "banknotes",
@@ -49,9 +49,9 @@ export const SABChatLayoutDefaults = {
       question: "How can I apply for a home loan?",
     },
     {
-      icon: "userGroup",
-      title: "Account Opening",
-      question: "How do I open a bank account?",
+      icon: "chatBubble",
+      title: "Live Support",
+      question: "I want to speak to a real person",
     },
   ],
 };

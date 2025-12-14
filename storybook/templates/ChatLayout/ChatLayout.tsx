@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useMemo } from "react";
-import { useGravityClient, StreamingState } from "../core";
-import ChatInput from "./components/ChatInput";
+import React, { useEffect, useRef, useMemo, useCallback } from "react";
+import { StreamingState } from "../core";
+import ChatInput from "../../components/ChatInput";
 import { ChatHistory } from "./components/ChatHistory";
 import type { ChatLayoutProps } from "./types";
 import styles from "./ChatLayout.module.css";
@@ -8,8 +8,17 @@ import styles from "./ChatLayout.module.css";
 export default function ChatLayout(props: ChatLayoutProps) {
   const { client, onStateChange, placeholder = "Ask me anything...", autoScroll = true } = props;
 
-  // Use universal Gravity client hook (handles sending, history)
-  const { history, sendMessage } = useGravityClient(client, onStateChange);
+  // Access history directly from client
+  const history = client.history.entries;
+
+  // Wrap sendMessage to also trigger streaming state
+  const sendMessage = useCallback(
+    (message: string) => {
+      onStateChange?.({ isStreaming: true });
+      client.sendMessage(message);
+    },
+    [client, onStateChange]
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

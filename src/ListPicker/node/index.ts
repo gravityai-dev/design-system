@@ -1,0 +1,41 @@
+/**
+ * ListPicker Node Definition
+ * Auto-generated from Storybook component
+ */
+
+import { NodeInputType, type EnhancedNodeDefinition } from "@gravityai-dev/plugin-base";
+import ListPickerExecutor from "./executor";
+import { loadDefaultTemplate } from "../service/templates";
+
+export const NODE_TYPE = "ListPicker";
+
+export function createNodeDefinition(): EnhancedNodeDefinition {
+  return {
+    packageVersion: "1.0.0",
+    type: NODE_TYPE,
+    name: "ListPicker",
+    description: "ListPicker UI component from design system",
+    category: "Design System",
+    color: "#10b981",
+    template: "uiComponent",
+    componentTemplate: loadDefaultTemplate(),
+    logoUrl: "https://res.cloudinary.com/sonik/image/upload/v1751366180/gravity/icons/gravityIcon.png",
+    inputs: [{ name: "signal", type: NodeInputType.OBJECT, description: "Signal" }],
+    outputs: [{ name: "output", type: NodeInputType.OBJECT, description: "Response object" }],
+    configSchema: {
+      "type": "object",
+      "properties": {},
+      "required": []
+},
+    credentials: [],
+  };
+}
+
+const definition = createNodeDefinition();
+
+export const ListPickerNode = {
+  definition,
+  executor: ListPickerExecutor,
+};
+
+export { createNodeDefinition as default };

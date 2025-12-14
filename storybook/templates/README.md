@@ -22,16 +22,62 @@ templates/
 ├── core/                    # Shared library (types, hooks, helpers)
 │   ├── index.ts             # Re-exports everything
 │   ├── types.ts             # StreamingState, GravityClient, GravityTemplateProps, etc.
-│   ├── hooks.ts             # useGravityClient, useGravityTemplate
+│   ├── hooks.ts             # useGravityTemplate (history utilities)
 │   ├── helpers.tsx          # filterComponents, renderComponent
 │   ├── mockClient.ts        # createMockClient, createMockClients (for Storybook)
 │   └── GravityTemplate.tsx  # Base class (optional, for class components)
 │
 ├── ChatLayout/              # Chat interface template
+├── ChatLayoutCompact/       # Compact chat with Amazon Connect support
 ├── KeyService/              # Single-column content template
 ├── BookingWidgetLayout/     # Booking form template
 └── README.md
 ```
+
+## Template Dependencies
+
+Templates are bundled by Vite and served as standalone JS files. Any dependencies a template needs must be in the **design-system's `package.json`**.
+
+### How It Works
+
+1. Template imports a library (e.g., `amazon-connect-chatjs`)
+2. Vite bundles the template from `/design-system/`
+3. Vite looks for dependencies in `/design-system/node_modules/`
+4. The library gets bundled INTO the template's JS file
+5. Other templates that don't import it are unaffected
+
+### Adding Template Dependencies
+
+Add to `/design-system/package.json`:
+
+```json
+{
+  "dependencies": {
+    "amazon-connect-chatjs": "^3.1.5"
+    // ... other deps
+  }
+}
+```
+
+Then run `npm install` in design-system.
+
+### What Gets Bundled
+
+| Template          | Dependencies Bundled          |
+| ----------------- | ----------------------------- |
+| ChatLayoutCompact | amazon-connect-chatjs (~50KB) |
+| ChatLayout        | (none extra)                  |
+| KeyService        | (none extra)                  |
+
+Each template only bundles what it imports. Unused dependencies don't affect other templates.
+
+### Why Not Template-Level package.json?
+
+Templates live inside the design-system folder. npm only reads the root `package.json` unless you configure workspaces. For simplicity, we add all template dependencies to the design-system's `package.json`. This:
+
+- ✅ Works with existing build
+- ✅ Only affects templates that import the dep
+- ✅ No workspace configuration needed
 
 ## Template Switching & Stacking
 
@@ -419,8 +465,7 @@ All templates share the same:
 
 2. **Hooks**
 
-   - `useGravityClient(client)` - Get history and sendMessage
-   - `useGravityTemplate(history)` - Utility methods for filtering
+   - `useGravityTemplate(history)` - Utility methods for filtering history
 
 3. **Base Classes** (Optional)
    - `GravityTemplate` - Class-based template base
@@ -453,50 +498,77 @@ interface GravityTemplateProps {
 
 ```typescript
 interface GravityClient {
+  /** Send a message to the workflow - handles history + server communication */
+  sendMessage: (message: string, options?: { targetTriggerNode?: string }) => void;
+
+  /** Send an agent message through server pipeline (for live agent, Amazon Connect, etc.) */
+  sendAgentMessage: (data: {
+    content: string;
+    chatId: string;
+    agentName?: string;
+    source?: string;
+    props?: Record<string, any>; // Additional component props (e.g., interactiveData)
+    metadata?: Record<string, any>;
+  }) => void;
+
+  /** Emit a custom action event (for cross-boundary communication) */
+  emitAction: (type: string, data: any) => void;
+
+  /** Read-only history for rendering */
   history: {
     entries: HistoryEntry[];
-    addUserMessage: (message: string, metadata?: any) => UserMessage;
-    addResponse: (responseData?: Partial<AssistantResponse>) => AssistantResponse;
-    updateResponse: (id: string, updates: Partial<AssistantResponse>) => AssistantResponse | null;
-    addComponentToResponse: (responseId: string, componentData: any, loadedComponent?: any) => AssistantResponse | null;
     getResponses: () => AssistantResponse[];
-    // Backward compatibility - deprecated
-    addComponent?: (componentData: any, loadedComponent?: any) => AssistantResponse;
-    updateEntry?: (id: string, updates: any) => HistoryEntry | null;
   };
-  websocket: {
-    sendUserAction: (action: string, data: any) => void;
-  };
+
+  /** Session context */
   session: SessionParams;
 }
 ```
 
-**Response Lifecycle:**
+**Key Principles:**
+
+- **`sendMessage`** - Send user messages to AI workflow. Handles history + server communication internally.
+- **`sendAgentMessage`** - Send agent messages (Amazon Connect, etc.) through server pipeline. Same flow as AI messages.
+- **`emitAction`** - For custom events like `end_live_chat` that bubble to client apps.
+- **`history`** - Read-only. Templates render, they don't modify history directly.
+- **No `websocket` exposed** - Templates don't need direct server access.
+
+**Response Lifecycle (handled by gravity-client, not templates):**
+
+The gravity-client automatically manages responses:
+
+1. `WORKFLOW_STARTED` → Creates response with `streamingState: 'streaming'`
+2. `COMPONENT_INIT` → Loads component, adds to response
+3. `COMPONENT_DATA` → Updates component data in Zustand
+4. `WORKFLOW_COMPLETED` → Updates response to `streamingState: 'complete'`
+
+**Agent messages follow the same pipeline:**
+
+1. Template calls `client.sendAgentMessage({ content, chatId, agentName, props, metadata })`
+2. Client sends `AGENT_MESSAGE` via WebSocket to server
+3. Server sends `WORKFLOW_STARTED` → `COMPONENT_INIT` → `WORKFLOW_COMPLETED`
+4. Client receives events, loads `AIResponse` component, adds to history
+5. Template renders from history (same as AI messages)
+
+**Example (SABLiveChatLayout):**
 
 ```typescript
-// 1. When workflow starts
-const response = client.history.addResponse({
-  chatId: userMessage.chatId,
-  streamingState: "streaming",
-  components: [],
-});
+const handleAgentMessage = (response: AssistantResponse) => {
+  const componentProps = response.components?.[0]?.props || {};
+  const { content, ...otherProps } = componentProps;
 
-// 2. As components arrive
-client.history.addComponentToResponse(
-  response.id,
-  {
-    type: "Card",
-    nodeId: "node-123",
-    props: { title: "Hello" },
-  },
-  LoadedComponent
-);
-
-// 3. When workflow completes
-client.history.updateResponse(response.id, {
-  streamingState: "complete",
-});
+  client.sendAgentMessage({
+    content: content || "",
+    chatId: response.chatId || `agent_${Date.now()}`,
+    agentName: response.components?.[0]?.metadata?.agentName || "Agent",
+    source: "amazon_connect",
+    props: otherProps, // Includes interactiveData for ListPicker, etc.
+    metadata: response.components?.[0]?.metadata,
+  });
+};
 ```
+
+Templates just render `client.history.entries` - they don't manage the lifecycle.
 
 ---
 
@@ -589,20 +661,27 @@ export interface MyTemplateProps extends GravityTemplateProps {
 
 ```typescript
 // MyTemplate.tsx
-import { useGravityClient, renderComponent, filterComponents, StreamingState } from "../core";
+import { renderComponent, filterComponents, StreamingState } from "../core";
 import type { MyTemplateProps } from "./types";
 
 export default function MyTemplate({ client }: MyTemplateProps) {
-  const { history } = useGravityClient(client);
+  // Access history directly from client - no hook needed
+  const history = client.history.entries;
 
   const latest = history.filter((e) => e.type === "assistant_response").pop();
   const components = latest?.components || [];
   const isStreaming = latest?.streamingState === StreamingState.STREAMING;
 
+  // Send messages using client.sendMessage()
+  const handleSend = (message: string) => {
+    client.sendMessage(message);
+  };
+
   return (
     <div>
       {isStreaming && <LoadingAnimation />}
       {filterComponents(components, { exclude: ["image"] }).map((c) => renderComponent(c))}
+      <input onSubmit={(e) => handleSend(e.target.value)} />
     </div>
   );
 }
@@ -668,8 +747,7 @@ import {
   type ResponseComponent,
 
   // Hooks
-  useGravityClient,
-  useGravityTemplate,
+  useGravityTemplate, // Utility methods for filtering history
 
   // Helpers
   filterComponents,
@@ -750,7 +828,7 @@ Shows all conversation history chronologically.
 
 ```typescript
 export default function ChatLayout({ client }) {
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
 
   return (
     <div>
@@ -775,7 +853,7 @@ Hero image at top, 2-column grid below (content 2/3, sidebar 1/3). Uses CSS modu
 import styles from "./KeyService.module.css";
 
 export default function KeyService({ client }: KeyServiceProps) {
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
   const latest = history.filter((e) => e.type === "assistant_response").pop();
   const components = latest?.components || [];
 
@@ -806,7 +884,7 @@ Components in a grid, specific types in specific positions.
 
 ```typescript
 export default function Dashboard({ client }) {
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
   const latest = history.filter((e) => e.type === "assistant_response").pop();
   const components = latest?.components || [];
 
@@ -994,6 +1072,55 @@ Templates focus purely on layout and rendering - they don't manage state or hand
 - Can delegate to sub-layouts
 - Can fetch their own data (e.g., booking engine fetches room types)
 - Can use design system components anywhere in their layout
+
+---
+
+## Shadow DOM & Cross-Boundary Communication
+
+Templates and components are rendered inside a **Shadow DOM** for style isolation. This means:
+
+- ✅ CSS doesn't leak in or out
+- ✅ Components are fully encapsulated
+
+### Sending Messages
+
+Templates use `client.sendMessage()` directly - this works through Shadow DOM because gravity-client handles the actual WebSocket communication.
+
+```typescript
+// In template - just call sendMessage
+client.sendMessage("Hello");
+```
+
+### Custom Actions (for non-message events)
+
+For custom events like button clicks or ending a live chat, use `client.emitAction()`:
+
+```typescript
+// In template - emit custom action
+client.emitAction("end_live_chat", { reason: "user_ended" });
+```
+
+**Client app receives via `onAction` callback:**
+
+```javascript
+// In ChatPage.jsx
+<GravityClient
+  onAction={(type, data) => {
+    if (type === "end_live_chat") {
+      // Use sendMessage from onReady callback
+      sendMessage("Return to main chat", { targetTriggerNode: "inputtrigger1" });
+    }
+  }}
+/>
+```
+
+### Common Action Types
+
+| Action Type     | Source            | Purpose                     |
+| --------------- | ----------------- | --------------------------- |
+| `click`         | Card, Card2       | Open drawer, trigger action |
+| `end_live_chat` | SABLiveChatLayout | Switch back to AI chat      |
+| `book`          | BookingWidget     | Confirm booking             |
 
 ---
 
@@ -1363,7 +1490,7 @@ Templates should gracefully handle components that fail to load:
 
 ```typescript
 export default function MyTemplate({ client }) {
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
 
   return (
     <div>
@@ -1396,9 +1523,8 @@ export default function MyTemplate({ client }) {
 The client handles WebSocket reconnection automatically, but templates can show connection status:
 
 ```typescript
-export default function MyTemplate({ client }) {
-  const { history, sendMessage } = useGravityClient(client);
-  const isConnected = client.websocket?.connected ?? true;
+export default function MyTemplate({ client, isConnected }) {
+  const history = client.history.entries;
 
   return (
     <div>
@@ -1419,7 +1545,7 @@ For long conversations, consider limiting rendered history:
 
 ```typescript
 export default function ChatLayout({ client, maxMessages = 50 }) {
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
 
   // Only render recent messages
   const recentHistory = history.slice(-maxMessages);
@@ -1458,7 +1584,7 @@ For templates with many components, use virtual scrolling:
 import { FixedSizeList } from "react-window";
 
 export default function ChatLayout({ client }) {
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
 
   return (
     <FixedSizeList height={600} itemCount={history.length} itemSize={100}>
@@ -1520,7 +1646,7 @@ class MyTemplate extends GravityTemplate {
 
 ```typescript
 export default function MyTemplate({ client }) {
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
 
   return (
     <div>

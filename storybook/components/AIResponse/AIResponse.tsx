@@ -29,9 +29,17 @@ interface AIResponseProps {
 export default function AIResponse(props: AIResponseProps) {
   const { progressText, text, questions, onQuestionClick, className, isStreaming } = props;
 
-  const [displayedText, setDisplayedText] = useState("");
+  // Initialize displayedText: empty for streaming, full text for completed responses
+  const [displayedText, setDisplayedText] = useState(() => {
+    // If not streaming and text exists, show immediately (completed response from history)
+    if (!props.isStreaming && props.text) {
+      return props.text;
+    }
+    return "";
+  });
   const animatorRef = useRef<ChunkAnimator | null>(null);
   const lastTextRef = useRef<string>("");
+  const hasInitializedRef = useRef(false);
 
   // Initialize animator once
   if (!animatorRef.current) {
@@ -42,13 +50,31 @@ export default function AIResponse(props: AIResponseProps) {
     });
   }
 
-  // Pass accumulated text to animator - only when it changes
-  useEffect(() => {
-    if (text && text !== lastTextRef.current) {
+  // Handle text updates - use useLayoutEffect to prevent flash
+  // useLayoutEffect runs synchronously after DOM mutations but before paint
+  React.useLayoutEffect(() => {
+    if (!text) return;
+
+    // If this is the first render and we're NOT streaming, text was already set in useState initializer
+    if (!hasInitializedRef.current && !isStreaming) {
+      lastTextRef.current = text;
+      hasInitializedRef.current = true;
+      return;
+    }
+
+    hasInitializedRef.current = true;
+
+    // Only animate if text has changed
+    if (text !== lastTextRef.current) {
+      // For first text during streaming, show first char immediately to prevent flash
+      if (lastTextRef.current === "" && text.length > 0) {
+        setDisplayedText(text.slice(0, 1));
+        animatorRef.current?.setDisplayedText(text.slice(0, 1));
+      }
       animatorRef.current?.addChunk(text);
       lastTextRef.current = text;
     }
-  }, [text]);
+  }, [text, isStreaming]);
 
   // Questions are always an array of strings
   const questionList = questions || [];

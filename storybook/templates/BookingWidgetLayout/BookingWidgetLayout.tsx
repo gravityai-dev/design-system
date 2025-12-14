@@ -1,5 +1,5 @@
 import React from "react";
-import { useGravityClient, renderComponent, filterComponents } from "../core";
+import { renderComponent, filterComponents } from "../core";
 import type { BookingWidgetLayoutProps } from "./types";
 import styles from "./BookingWidgetLayout.module.css";
 
@@ -11,7 +11,7 @@ import styles from "./BookingWidgetLayout.module.css";
  */
 export default function BookingWidgetLayout(props: BookingWidgetLayoutProps) {
   const { client } = props;
-  const { history } = useGravityClient(client);
+  const history = client.history.entries;
 
   // Get all components from all assistant responses
   const allComponents = history
