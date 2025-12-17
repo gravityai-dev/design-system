@@ -1,6 +1,6 @@
 {
   "name": "@gravityai-dev/design-system",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "AI-powered design system with server-driven components",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",

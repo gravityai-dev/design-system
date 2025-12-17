@@ -193,28 +193,72 @@
 /* Tables */
 .prose table {
   width: 100%;
-  border-collapse: collapse;
-  margin: 1.5em 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1em 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .prose th,
 .prose td {
-  padding: var(--spacing-2) var(--spacing-3);
-  border: 1px solid var(--color-border-default);
+  padding: var(--spacing-3) var(--spacing-4);
   text-align: left;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .prose th {
-  background-color: var(--color-gray-50);
+  background: linear-gradient(to bottom, var(--color-gray-50), var(--color-gray-100));
   font-weight: var(--font-weight-semibold);
-  font-size: var(--text-label-md);
+  font-size: var(--text-label-sm);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-label);
   color: var(--color-text-secondary);
+  border-bottom: 2px solid var(--color-border-default);
 }
 
 .prose td {
-  font-size: var(--text-body-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-gray-800);
+  background-color: var(--color-white);
+}
+
+.prose tbody tr:hover td {
+  background-color: var(--color-gray-50);
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Amount column - right align (3rd column typically) */
+.prose td:nth-child(3),
+.prose th:nth-child(3) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Category column - allow wrapping, smaller text */
+.prose td:nth-child(4),
+.prose th:nth-child(4) {
+  font-size: var(--text-label-sm);
+  word-break: break-word;
+}
+
+/* Bold rows (totals) */
+.prose tr:has(td strong) td,
+.prose tr:has(th strong) th {
+  background-color: var(--color-gray-100);
+  font-weight: var(--font-weight-semibold);
+  border-top: 2px solid var(--color-border-default);
+}
+
+/* Money styling in tables */
+.prose td strong {
+  color: var(--sab-red);
+  font-weight: var(--font-weight-bold);
 }
 
 /* Images */

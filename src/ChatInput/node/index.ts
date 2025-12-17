@@ -11,7 +11,7 @@ export const NODE_TYPE = "ChatInput";
 
 export function createNodeDefinition(): EnhancedNodeDefinition {
   return {
-    packageVersion: "0.2.4",
+    packageVersion: "1.0.0",
     type: NODE_TYPE,
     name: "ChatInput",
     description: "ChatInput UI component from design system",
