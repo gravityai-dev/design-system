@@ -7,9 +7,27 @@ import { StreamingState } from "./types";
 import type { UserMessage, AssistantResponse, ResponseComponent, GravityClient } from "./types";
 
 /**
+ * Suggestions type for mock client
+ */
+export interface MockSuggestions {
+  faqs?: Array<{ id?: string; question: string }>;
+  actions?: Array<{
+    object?: Record<string, any>;
+    title?: string;
+    description?: string;
+    image?: string;
+    callToAction?: string;
+  }>;
+  recommendations?: Array<{ id: string; text: string; confidence?: number; actionLabel?: string }>;
+}
+
+/**
  * Create a mock GravityClient for Storybook
  */
-export function createMockClient(history: (UserMessage | AssistantResponse)[] = []): GravityClient {
+export function createMockClient(
+  history: (UserMessage | AssistantResponse)[] = [],
+  suggestions?: MockSuggestions
+): GravityClient {
   return {
     sendMessage: (message: string, options?: { targetTriggerNode?: string }) => {
       console.log("[Mock] Send message:", message, options);
@@ -40,6 +58,7 @@ export function createMockClient(history: (UserMessage | AssistantResponse)[] = 
       workflowId: "story-workflow",
       targetTriggerNode: "story-trigger",
     },
+    suggestions: suggestions || { faqs: [], actions: [], recommendations: [] },
   };
 }
 
@@ -56,6 +75,14 @@ export interface MockComponent {
 }
 
 /**
+ * Options for createMockClients
+ */
+export interface CreateMockClientsOptions {
+  /** Suggestions to include in the mock client */
+  suggestions?: MockSuggestions;
+}
+
+/**
  * Create mock clients for all 3 Storybook states
  *
  * @example
@@ -64,7 +91,8 @@ export interface MockComponent {
  *   { componentType: "Card", Component: Card, props: CardDefaults },
  * ]);
  */
-export function createMockClients(completeComponents: MockComponent[]) {
+export function createMockClients(completeComponents: MockComponent[], options?: CreateMockClientsOptions) {
+  const suggestions = options?.suggestions;
   // STATE 1: INITIAL - Empty
   const mockHistoryInitial: (UserMessage | AssistantResponse)[] = [];
 
@@ -103,8 +131,8 @@ export function createMockClients(completeComponents: MockComponent[]) {
     mockHistoryInitial,
     mockHistoryStreaming,
     mockHistoryComplete,
-    mockClientInitial: createMockClient(mockHistoryInitial),
-    mockClientStreaming: createMockClient(mockHistoryStreaming),
-    mockClientComplete: createMockClient(mockHistoryComplete),
+    mockClientInitial: createMockClient(mockHistoryInitial, suggestions),
+    mockClientStreaming: createMockClient(mockHistoryStreaming, suggestions),
+    mockClientComplete: createMockClient(mockHistoryComplete, suggestions),
   };
 }

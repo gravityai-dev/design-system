@@ -25,9 +25,6 @@ export default class CardCarouselExecutor extends PromiseNode {
     // Pass config values to component
     // Include all defined props, even empty strings (for streaming text)
     const props: Record<string, any> = {};
-    if (config.title !== undefined) {
-      props.title = config.title;
-    }
     if (config.items !== undefined) {
       props.items = config.items;
     }

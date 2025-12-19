@@ -1,43 +1,37 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import ChatInput from "./ChatInput";
-import { ChatInputDefaults } from "./defaults";
+import { ChatInputDefaults, demoFaqs, demoActions } from "./defaults";
 
 const meta: Meta<typeof ChatInput> = {
   title: "Components/ChatInput",
   component: ChatInput,
   parameters: {
     layout: "centered",
-    workflowSize: { width: 500, height: 100 },
   },
   argTypes: {
     placeholder: {
       control: "text",
       description: "Placeholder text for the input field",
-      workflowInput: true,
     },
     disabled: {
       control: "boolean",
       description: "Whether the input is disabled (e.g., during streaming)",
-      workflowInput: true,
     },
     enableAudio: {
       control: "boolean",
       description: "Show microphone button for voice input",
-      workflowInput: true,
     },
-    isRecording: {
-      control: "boolean",
-      description: "Whether audio is currently being recorded",
-      workflowInput: true,
+    faqs: {
+      control: "object",
+      description: "Array of FAQ objects (from workflow metadata)",
     },
-    onSend: {
-      action: "onSend",
-      description: "Callback when message is sent",
+    actions: {
+      control: "object",
+      description: "Array of action objects (from workflow metadata)",
     },
-    onMicrophoneClick: {
-      action: "onMicrophoneClick",
-      description: "Callback when microphone button is clicked",
-    },
+    onSend: { action: "onSend" },
+    onFaqClick: { action: "onFaqClick" },
+    onActionClick: { action: "onActionClick" },
   },
   decorators: [
     (Story) => (
@@ -51,36 +45,24 @@ const meta: Meta<typeof ChatInput> = {
 export default meta;
 type Story = StoryObj<typeof ChatInput>;
 
+// Default - Ready for input, no FAQs/Actions (workflow hasn't sent any)
 export const Default: Story = {
   args: ChatInputDefaults,
 };
 
-export const WithAudio: Story = {
-  args: {
-    ...ChatInputDefaults,
-    enableAudio: true,
-  },
-};
-
-export const Recording: Story = {
-  args: {
-    ...ChatInputDefaults,
-    enableAudio: true,
-    isRecording: true,
-  },
-};
-
-export const Disabled: Story = {
+// Streaming - Input disabled while AI is responding
+export const Streaming: Story = {
   args: {
     ...ChatInputDefaults,
     disabled: true,
   },
 };
 
-export const CustomPlaceholder: Story = {
+// WithSuggestions - Workflow has sent FAQs and Actions
+export const WithSuggestions: Story = {
   args: {
     ...ChatInputDefaults,
-    placeholder: "Type your message here...",
-    enableAudio: true,
+    faqs: demoFaqs,
+    actions: demoActions,
   },
 };

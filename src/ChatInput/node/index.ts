@@ -20,37 +20,11 @@ export function createNodeDefinition(): EnhancedNodeDefinition {
     template: "uiComponent",
     componentTemplate: loadDefaultTemplate(),
     logoUrl: "https://res.cloudinary.com/sonik/image/upload/v1751366180/gravity/icons/gravityIcon.png",
-    nodeSize: { width: 500, height: 100 },
     inputs: [{ name: "signal", type: NodeInputType.OBJECT, description: "Signal" }],
     outputs: [{ name: "output", type: NodeInputType.OBJECT, description: "Response object" }],
     configSchema: {
       "type": "object",
-      "properties": {
-            "placeholder": {
-                  "type": "string",
-                  "title": "Placeholder text for the input field",
-                  "default": "Ask me anything...",
-                  "ui:field": "template"
-            },
-            "disabled": {
-                  "type": "boolean",
-                  "title": "Whether the input is disabled (e.g., during streaming)",
-                  "default": false,
-                  "ui:widget": "toggle"
-            },
-            "enableAudio": {
-                  "type": "boolean",
-                  "title": "Show microphone button for voice input",
-                  "default": false,
-                  "ui:widget": "toggle"
-            },
-            "isRecording": {
-                  "type": "boolean",
-                  "title": "Whether audio is currently being recorded",
-                  "default": false,
-                  "ui:widget": "toggle"
-            }
-      },
+      "properties": {},
       "required": []
 },
     credentials: [],

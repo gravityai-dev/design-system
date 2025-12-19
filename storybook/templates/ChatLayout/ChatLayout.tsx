@@ -30,6 +30,16 @@ export default function ChatLayout(props: ChatLayoutProps) {
     );
   }, [history]);
 
+  // Get suggestions from client state (populated via SUGGESTIONS_UPDATE WebSocket event)
+  const { faqs, actions, recommendations } = useMemo(() => {
+    const suggestions = client.suggestions || {};
+    return {
+      faqs: suggestions.faqs || [],
+      actions: suggestions.actions || [],
+      recommendations: suggestions.recommendations || [],
+    };
+  }, [client.suggestions]);
+
   // Auto-scroll to bottom when history changes (new messages)
   useEffect(() => {
     if (autoScroll && messagesEndRef.current) {
@@ -69,7 +79,14 @@ export default function ChatLayout(props: ChatLayoutProps) {
       {/* Input Area - Fixed at bottom */}
       <div className={styles.inputArea}>
         <div className={styles.inputInner}>
-          <ChatInput placeholder={placeholder} onSend={sendMessage} disabled={isStreaming} />
+          <ChatInput
+            placeholder={placeholder}
+            onSend={sendMessage}
+            disabled={isStreaming}
+            faqs={faqs}
+            actions={actions}
+            recommendations={recommendations}
+          />
         </div>
       </div>
     </div>

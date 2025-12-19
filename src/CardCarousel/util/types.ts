@@ -4,7 +4,6 @@
  */
 
 export interface CardCarouselConfig {
-  title?: string;
   items?: object;
   onCardClick?: string;
 }

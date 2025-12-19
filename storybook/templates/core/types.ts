@@ -109,6 +109,19 @@ export interface GravityClient {
   /** Session context */
   session: SessionParams;
 
+  /** Suggestions from workflow (FAQs, Actions, Recommendations) */
+  suggestions?: {
+    faqs?: Array<{ id?: string; question: string }>;
+    actions?: Array<{
+      object?: Record<string, any>;
+      title?: string;
+      description?: string;
+      image?: string;
+      callToAction?: string;
+    }>;
+    recommendations?: Array<{ id: string; text: string; confidence?: number; actionLabel?: string }>;
+  };
+
   /** WebSocket URL for audio connections (e.g., ws://localhost:4100) */
   wsUrl?: string;
 

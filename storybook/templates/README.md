@@ -689,15 +689,27 @@ export default function MyTemplate({ client }: MyTemplateProps) {
 
 ### Step 3: Create Defaults (for Storybook)
 
+**Important:** Always import demo data from component defaults - never duplicate it in templates.
+
 ```typescript
 // defaults.tsx
 import { createMockClients } from "../core";
 import AIResponse from "../../components/AIResponse/AIResponse";
 import { AIResponseDefaults } from "../../components/AIResponse/defaults";
+// Import demo data from component defaults (single source of truth)
+import { demoFaqs, demoActions } from "../../components/ChatInput/defaults";
 
-export const { mockClientInitial, mockClientStreaming, mockClientComplete } = createMockClients([
-  { componentType: "AIResponse", Component: AIResponse, props: AIResponseDefaults },
-]);
+// Use component defaults for suggestions (no duplication)
+const defaultSuggestions = {
+  faqs: demoFaqs,
+  actions: demoActions,
+  recommendations: [],
+};
+
+export const { mockClientInitial, mockClientStreaming, mockClientComplete } = createMockClients(
+  [{ componentType: "AIResponse", Component: AIResponse, props: AIResponseDefaults }],
+  { suggestions: defaultSuggestions }
+);
 
 export const MyTemplateDefaults = {
   customProp: "default value",

@@ -46,6 +46,17 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
     );
   }, [history]);
 
+  // Get suggestions from client state (populated via SUGGESTIONS_UPDATE WebSocket event)
+  const { faqs, actions, recommendations } = useMemo(() => {
+    const suggestions = client.suggestions || {};
+    console.log("[SABChatLayout] client.suggestions:", suggestions);
+    return {
+      faqs: suggestions.faqs || [],
+      actions: suggestions.actions || [],
+      recommendations: suggestions.recommendations || [],
+    };
+  }, [client.suggestions]);
+
   // Determine if we should show welcome screen (no messages yet)
   const showWelcome = history.length === 0;
 
@@ -107,7 +118,15 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
 
         {/* Input area */}
         <div className={styles.inputArea}>
-          <ChatInput placeholder={placeholder} onSend={sendMessage} disabled={isStreaming} enableAudio={true} />
+          <ChatInput
+            placeholder={placeholder}
+            onSend={sendMessage}
+            disabled={isStreaming}
+            enableAudio={true}
+            faqs={faqs}
+            actions={actions}
+            recommendations={recommendations}
+          />
         </div>
       </div>
     </div>

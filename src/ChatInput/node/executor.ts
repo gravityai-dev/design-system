@@ -34,14 +34,20 @@ export default class ChatInputExecutor extends PromiseNode {
     if (config.enableAudio !== undefined) {
       props.enableAudio = config.enableAudio;
     }
-    if (config.isRecording !== undefined) {
-      props.isRecording = config.isRecording;
+    if (config.faqs !== undefined) {
+      props.faqs = config.faqs;
+    }
+    if (config.actions !== undefined) {
+      props.actions = config.actions;
     }
     if (config.onSend !== undefined) {
       props.onSend = config.onSend;
     }
-    if (config.onMicrophoneClick !== undefined) {
-      props.onMicrophoneClick = config.onMicrophoneClick;
+    if (config.onFaqClick !== undefined) {
+      props.onFaqClick = config.onFaqClick;
+    }
+    if (config.onActionClick !== undefined) {
+      props.onActionClick = config.onActionClick;
     }
 
     // Load template (just need componentUrl)

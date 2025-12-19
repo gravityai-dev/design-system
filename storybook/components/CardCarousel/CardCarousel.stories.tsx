@@ -18,11 +18,6 @@ const meta: Meta<typeof CardCarousel> = {
   ],
   argTypes: {
     // ✅ Workflow inputs - data from AI
-    title: {
-      control: "text",
-      description: "Section title above the carousel",
-      workflowInput: true,
-    },
     items: {
       control: "object",
       description: "Array of card items to display (from PostgresFetch or similar)",
@@ -41,33 +36,25 @@ export default meta;
 type Story = StoryObj<typeof CardCarousel>;
 
 export const Default: Story = {
-  args: CardCarouselDefaults,
-};
-
-export const WithoutTitle: Story = {
   args: {
-    ...CardCarouselDefaults,
-    title: undefined,
+    items: CardCarouselDefaults.items,
   },
 };
 
 export const SingleItem: Story = {
   args: {
-    title: "Featured Service",
     items: [CardCarouselDefaults.items[0]],
   },
 };
 
 export const ManyItems: Story = {
   args: {
-    title: "All Services",
     items: [...CardCarouselDefaults.items, ...CardCarouselDefaults.items],
   },
 };
 
 export const NoImages: Story = {
   args: {
-    title: "Text Only Cards",
     items: CardCarouselDefaults.items.map((item) => ({
       ...item,
       image: undefined,

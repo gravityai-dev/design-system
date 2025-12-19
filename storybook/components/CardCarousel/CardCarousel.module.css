@@ -63,11 +63,15 @@
 }
 
 .navLeft {
-  left: 0;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .navRight {
-  right: 0;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Individual Card */
@@ -132,7 +136,7 @@
 .image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   transition: transform var(--transition-slow);
 }

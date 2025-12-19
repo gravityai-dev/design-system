@@ -4,7 +4,6 @@
  */
 
 export const CardCarouselDefaults = {
-  title: "Recommended Services",
   items: [
     {
       object_type: "service",

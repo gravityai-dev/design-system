@@ -7,9 +7,11 @@ export interface ChatInputConfig {
   placeholder?: string;
   disabled?: boolean;
   enableAudio?: boolean;
-  isRecording?: boolean;
+  faqs?: object;
+  actions?: object;
   onSend?: string;
-  onMicrophoneClick?: string;
+  onFaqClick?: string;
+  onActionClick?: string;
 }
 
 export interface ChatInputOutput {

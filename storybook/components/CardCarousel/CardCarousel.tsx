@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./CardCarousel.module.css";
 import Button from "../../atoms/Button/Button";
 import { CardCarouselDefaults } from "./defaults";
@@ -21,12 +22,11 @@ interface CardItem {
 
 interface CardCarouselProps {
   items?: CardItem[];
-  title?: string;
   onCardClick?: (item: CardItem) => void;
 }
 
 export default function CardCarousel(props: CardCarouselProps) {
-  const { items = [], title, onCardClick } = props;
+  const { items = [], onCardClick } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -59,14 +59,11 @@ export default function CardCarousel(props: CardCarouselProps) {
 
   // Show default sample data when no items provided (for workflow preview)
   const displayItems = items && items.length > 0 ? items : CardCarouselDefaults.items;
-  const displayTitle = title || (items && items.length > 0 ? undefined : CardCarouselDefaults.title);
 
   const isSingleItem = displayItems.length === 1;
 
   return (
     <div className={styles.container}>
-      {displayTitle && <h2 className={styles.sectionTitle}>{displayTitle}</h2>}
-
       <div className={styles.carouselWrapper}>
         {!isSingleItem && (
           <button
@@ -74,7 +71,7 @@ export default function CardCarousel(props: CardCarouselProps) {
             onClick={() => scroll("left")}
             aria-label="Scroll left"
           >
-            ‹
+            <ChevronLeft size={24} />
           </button>
         )}
 
@@ -112,7 +109,7 @@ export default function CardCarousel(props: CardCarouselProps) {
             onClick={() => scroll("right")}
             aria-label="Scroll right"
           >
-            ›
+            <ChevronRight size={24} />
           </button>
         )}
       </div>

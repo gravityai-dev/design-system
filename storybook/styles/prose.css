@@ -85,21 +85,31 @@
   color: var(--sab-red);
   text-decoration: none;
   font-weight: var(--font-weight-semibold);
-  padding: 0.125rem 0.375rem;
-  border-radius: var(--radius-sm);
-  background-color: var(--sab-red-50);
-  border-bottom: 2px solid var(--sab-red-200);
   transition: all var(--transition-base);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+  border-radius: var(--radius-sm);
+  padding: 0 0.125rem;
+  margin: 0 -0.125rem;
 }
 
 .prose a:hover {
   color: var(--sab-red-hover);
-  background-color: var(--sab-red-100);
-  border-bottom-color: var(--sab-red);
-  transform: translateY(-1px);
+  background-color: var(--sab-red-50);
+}
+
+/* Links inside bold text should still be red */
+.prose strong a,
+.prose a strong,
+.prose b a,
+.prose a b {
+  color: var(--sab-red);
+  font-weight: var(--font-weight-bold);
+}
+
+.prose strong a:hover,
+.prose a strong:hover,
+.prose b a:hover,
+.prose a b:hover {
+  color: var(--sab-red-hover);
 }
 
 /* External link icon */
