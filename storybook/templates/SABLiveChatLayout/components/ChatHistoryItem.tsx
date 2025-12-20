@@ -34,19 +34,6 @@ interface ChatHistoryItemProps {
 export function ChatHistoryItem({ response, onQuestionClick }: ChatHistoryItemProps) {
   const { streamingState, components, timestamp } = response;
 
-  // Debug: Log component details
-  console.log("[ChatHistoryItem] Response:", {
-    id: response.id,
-    streamingState,
-    componentsCount: components.length,
-    components: components.map((c) => ({
-      id: c.id,
-      componentType: c.componentType,
-      hasComponent: !!c.Component,
-      props: c.props,
-    })),
-  });
-
   // Show animation whenever workflow is streaming/running
   const showAnimation = streamingState === "streaming";
 

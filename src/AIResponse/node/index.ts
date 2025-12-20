@@ -26,6 +26,13 @@ export function createNodeDefinition(): EnhancedNodeDefinition {
     configSchema: {
       "type": "object",
       "properties": {
+            "focusable": {
+                  "type": "boolean",
+                  "title": "Enable Focus Mode",
+                  "description": "Allow this component to expand and become the primary interaction surface",
+                  "default": false,
+                  "ui:widget": "toggle"
+            },
             "progressText": {
                   "type": "string",
                   "title": "Progress/thinking message",

@@ -4,6 +4,8 @@
  */
 
 export interface BookingWidgetConfig {
+  /** Enable Focus Mode - allow component to expand as primary interaction surface */
+  focusable?: boolean;
   bookingData?: object;
   editable?: boolean;
   onBookingChange?: string;

@@ -24,7 +24,15 @@ export function createNodeDefinition(): EnhancedNodeDefinition {
     outputs: [{ name: "output", type: NodeInputType.OBJECT, description: "Response object" }],
     configSchema: {
       "type": "object",
-      "properties": {},
+      "properties": {
+            "focusable": {
+                  "type": "boolean",
+                  "title": "Enable Focus Mode",
+                  "description": "Allow this component to expand and become the primary interaction surface",
+                  "default": false,
+                  "ui:widget": "toggle"
+            }
+      },
       "required": []
 },
     credentials: [],

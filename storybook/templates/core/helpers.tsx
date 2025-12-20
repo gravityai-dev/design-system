@@ -4,6 +4,7 @@
 
 import React from "react";
 import type { ResponseComponent } from "./types";
+import { FocusableWrapper } from "./FocusMode";
 
 /**
  * Check if component matches a type or category
@@ -80,10 +81,41 @@ export function filterComponents(
 /**
  * Render a component from workflow history
  * Handles all the boilerplate: props spreading, nodeId, chatId
+ * Automatically wraps focusable components with FocusableWrapper
+ *
+ * @param component - The component to render
+ * @param additionalProps - Extra props to pass to the component
+ * @param onOpenFocus - Callback to open focus mode (from client.openFocus)
+ * @param focusedComponentId - ID of currently focused component (to set displayState)
  */
-export function renderComponent(component: ResponseComponent, additionalProps?: Record<string, any>) {
+export function renderComponent(
+  component: ResponseComponent,
+  additionalProps?: Record<string, any>,
+  onOpenFocus?: (componentId: string, targetTriggerNode: string | null, chatId: string | null) => void,
+  focusedComponentId?: string | null
+) {
   const { Component, props, id, nodeId, chatId } = component;
   if (!Component) return null;
 
-  return <Component key={id} {...props} nodeId={nodeId} chatId={chatId} {...additionalProps} />;
+  // Check if component is focusable (set by workflow designer)
+  const isFocusable = props?.focusable === true;
+
+  // Determine displayState: 'focused' if this component is focused, 'inline' if focusable but not focused
+  const isFocused = focusedComponentId === id;
+  const displayState = isFocusable ? (isFocused ? "focused" : "inline") : undefined;
+
+  const renderedComponent = (
+    <Component key={id} {...props} nodeId={nodeId} chatId={chatId} displayState={displayState} {...additionalProps} />
+  );
+
+  // Only show FocusableWrapper (expand button) when NOT focused
+  if (isFocusable && !isFocused) {
+    return (
+      <FocusableWrapper key={id} component={component} onOpenFocus={onOpenFocus}>
+        {renderedComponent}
+      </FocusableWrapper>
+    );
+  }
+
+  return renderedComponent;
 }

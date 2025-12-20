@@ -38,6 +38,11 @@ export default class ${metadata.name}Executor extends PromiseNode {
     // Pass config values to component
     // Include all defined props, even empty strings (for streaming text)
     const props: Record<string, any> = {};
+    
+    // Always pass focusable (universal Focus Mode config)
+    if (config.focusable !== undefined) {
+      props.focusable = config.focusable;
+    }
 ${Object.keys(metadata.argTypes)
   .map((key) => {
     return `    if (config.${key} !== undefined) {
@@ -81,6 +86,7 @@ ${Object.keys(metadata.argTypes)
         workflowId: context.workflowId,
         workflowRunId: context.executionId,
         nodeId: context.nodeId,
+        targetTriggerNode: context.publishingContext.targetTriggerNode, // For Focus Mode routing
       },
       context.api,
       context // Pass full context for workflow state access

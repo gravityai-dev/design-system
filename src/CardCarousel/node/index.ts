@@ -26,6 +26,13 @@ export function createNodeDefinition(): EnhancedNodeDefinition {
     configSchema: {
       "type": "object",
       "properties": {
+            "focusable": {
+                  "type": "boolean",
+                  "title": "Enable Focus Mode",
+                  "description": "Allow this component to expand and become the primary interaction surface",
+                  "default": false,
+                  "ui:widget": "toggle"
+            },
             "items": {
                   "type": "object",
                   "title": "Array of card items to display (from PostgresFetch or similar)",

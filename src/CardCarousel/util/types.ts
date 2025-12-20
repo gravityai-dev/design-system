@@ -4,6 +4,8 @@
  */
 
 export interface CardCarouselConfig {
+  /** Enable Focus Mode - allow component to expand as primary interaction surface */
+  focusable?: boolean;
   items?: object;
   onCardClick?: string;
 }

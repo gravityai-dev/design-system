@@ -4,6 +4,8 @@
  */
 
 export interface AIResponseConfig {
+  /** Enable Focus Mode - allow component to expand as primary interaction surface */
+  focusable?: boolean;
   progressText?: string;
   text?: object;
   questions?: object;

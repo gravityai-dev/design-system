@@ -18,6 +18,8 @@ export function generateTypes(metadata: ComponentMetadata): string {
  */
 
 export interface ${metadata.name}Config {
+  /** Enable Focus Mode - allow component to expand as primary interaction surface */
+  focusable?: boolean;
 ${propsInterface}
 }
 

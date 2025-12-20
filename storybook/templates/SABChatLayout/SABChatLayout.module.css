@@ -94,6 +94,12 @@
   flex-direction: column;
 }
 
+/* Remove padding when focus mode is active - component fills entire area */
+.messagesAreaFocused {
+  padding: 0;
+  overflow: hidden;
+}
+
 .messagesContent {
   flex: 1;
   display: flex;
@@ -105,9 +111,64 @@
   margin-top: var(--spacing-4);
 }
 
+/* Focus Mode - renders at template level, outside scrollable area */
+.focusContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #ffffff;
+  animation: focusFadeIn 0.2s ease-out;
+}
+
+.focusCloseButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  z-index: 10;
+}
+
+.focusCloseButton:hover {
+  background: #ffffff;
+  color: #111827;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.focusContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+@keyframes focusFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Input area */
 .inputArea {
   padding: var(--spacing-5) var(--spacing-8);
-  border-top: 1px solid var(--color-gray-200);
   background-color: #ffffff;
 }

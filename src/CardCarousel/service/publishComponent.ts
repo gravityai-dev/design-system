@@ -45,6 +45,7 @@ export interface ComponentPublishConfig {
   workflowId: string;
   workflowRunId: string;
   nodeId: string;
+  targetTriggerNode?: string; // Which trigger handles this component (for Focus Mode)
   metadata?: Record<string, any>;
   isUpdate?: boolean; // True for delta updates, false/undefined for initial render
   changedProps?: Record<string, any>; // Only the props that changed
@@ -103,6 +104,7 @@ export async function publishComponent(
           workflowId: config.workflowId,
           workflowRunId: config.workflowRunId,
           componentKey, // Send key so client can track it
+          targetTriggerNode: config.targetTriggerNode, // For Focus Mode routing
         },
       };
       

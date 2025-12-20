@@ -25,6 +25,11 @@ export default class Card2Executor extends PromiseNode {
     // Pass config values to component
     // Include all defined props, even empty strings (for streaming text)
     const props: Record<string, any> = {};
+    
+    // Always pass focusable (universal Focus Mode config)
+    if (config.focusable !== undefined) {
+      props.focusable = config.focusable;
+    }
     if (config.title !== undefined) {
       props.title = config.title;
     }
@@ -76,6 +81,7 @@ export default class Card2Executor extends PromiseNode {
         workflowId: context.workflowId,
         workflowRunId: context.executionId,
         nodeId: context.nodeId,
+        targetTriggerNode: context.publishingContext.targetTriggerNode, // For Focus Mode routing
       },
       context.api,
       context // Pass full context for workflow state access

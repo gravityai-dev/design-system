@@ -62,6 +62,11 @@
   --sab-red-50: #fef2f2;
   --sab-red-100: #fee2e2;
   --sab-red-200: #fecaca;
+
+  /* SAB Dark/Slate */
+  --sab-slate: #42505c;
+  --sab-slate-light: #536270;
+  --sab-slate-dark: #343f48;
 }
 
 /**

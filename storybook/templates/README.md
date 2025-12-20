@@ -757,13 +757,18 @@ import {
   type GravityTemplateProps,
   type GravityClient,
   type ResponseComponent,
+  type FocusState,
 
   // Hooks
   useGravityTemplate, // Utility methods for filtering history
+  useFocusedComponent, // Focus Mode - get focused component from history
 
   // Helpers
   filterComponents,
   renderComponent,
+
+  // Focus Mode
+  withFocusMode, // HOC - wraps history renderer with focus mode
 
   // Storybook
   createMockClients,
@@ -774,9 +779,85 @@ import {
 
 ---
 
+## Focus Mode
+
+Focus Mode allows components to expand and become the primary interaction surface. When focused, messages route to the component's InputTrigger and update it in place.
+
+### Using Focus Mode in Templates
+
+**Option 1: `useFocusedComponent` hook** (recommended for custom rendering)
+
+```typescript
+import { useFocusedComponent } from "../core";
+
+function MyHistory({ history, client }) {
+  const { isFocusOpen, focusedComponent, closeFocus } = useFocusedComponent(history, client);
+
+  if (isFocusOpen && focusedComponent) {
+    const { Component, props, nodeId, chatId } = focusedComponent;
+    return (
+      <div className="focus-container">
+        <button onClick={closeFocus}>Close</button>
+        <Component {...props} nodeId={nodeId} chatId={chatId} />
+      </div>
+    );
+  }
+
+  // Normal history rendering
+  return <div>{/* ... */}</div>;
+}
+```
+
+**Option 2: `withFocusMode` HOC** (automatic focus handling)
+
+```typescript
+import { withFocusMode } from "../core";
+
+// Your history renderer (doesn't need focus logic)
+function MyHistoryRenderer({ history, client }) {
+  return <div>{/* render history normally */}</div>;
+}
+
+// Wrap with focus mode - automatically handles focus rendering
+const FocusableHistory = withFocusMode(MyHistoryRenderer);
+
+// Use in template
+<FocusableHistory history={history} client={client} />;
+```
+
+### How It Works
+
+1. **Workflow designer** sets `focusable: true` on component config
+2. **`renderComponent()`** automatically wraps focusable components with expand button
+3. **User clicks expand** → calls `client.openFocus(componentId, targetTriggerNode, chatId)`
+4. **Template** uses hook/HOC to render focused component expanded
+5. **Messages** automatically route to `focusState.targetTriggerNode` with same `chatId`
+6. **Component updates** in place (same chatId = update, not replace)
+
+### Focus State (in `client.focusState`)
+
+```typescript
+interface FocusState {
+  focusedComponentId: string | null; // ID of focused component
+  targetTriggerNode: string | null; // InputTrigger to route messages to
+  chatId: string | null; // Same chatId keeps component rendered
+}
+```
+
+### Key Points
+
+- **Universal** - Works with ANY template automatically
+- **Zero component changes** - Components don't know about focus mode
+- **Message routing** - Handled by `GravityClient.sendMessage()` automatically
+- **State in Zustand** - `focusState` lives in shared store, survives template switches
+
+> 📖 **Full documentation**: [/docs/FOCUS_MODE.md](/docs/FOCUS_MODE.md)
+
+---
+
 ## Helper Functions
 
-### `renderComponent(component, additionalProps?)`
+### `renderComponent(component, additionalProps?, onOpenFocus?)`
 
 Renders a component from workflow history with all required props.
 
@@ -790,6 +871,11 @@ Renders a component from workflow history with all required props.
 {
   components.map((c) => renderComponent(c, { className: "mb-4" }));
 }
+
+// With focus mode support (pass client.openFocus)
+{
+  components.map((c) => renderComponent(c, { streamingState }, client?.openFocus));
+}
 ```
 
 **What it does:**
@@ -798,6 +884,7 @@ Renders a component from workflow history with all required props.
 - Passes `nodeId` and `chatId` for Zustand subscription
 - Handles null/undefined components
 - Returns JSX with proper key
+- **Wraps focusable components** with expand button (if `onOpenFocus` provided)
 
 ---
 

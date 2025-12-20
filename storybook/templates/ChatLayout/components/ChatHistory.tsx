@@ -1,10 +1,15 @@
 /**
  * ChatHistory - Renders the conversation timeline
  * Chat-specific rendering: user messages on right, assistant responses on left
+ *
+ * NOTE: Focus Mode rendering is handled at the TEMPLATE level (e.g., SABChatLayout)
+ * so the focused component renders outside the scrollable area.
+ * This component just renders history - it does NOT handle focus mode rendering.
  */
 
 import React from "react";
 import type { HistoryEntry } from "./types";
+import type { GravityClient } from "../../core/types";
 import { ChatHistoryItem } from "./ChatHistoryItem";
 import styles from "./ChatHistory.module.css";
 
@@ -12,29 +17,12 @@ interface ChatHistoryProps {
   history: HistoryEntry[];
   onQuestionClick?: (question: string) => void;
   onComponentAction?: (actionType: string, actionData: any) => void;
+  /** Client context for focus mode (passed to ChatHistoryItem for expand button) */
+  client?: GravityClient;
 }
 
-export function ChatHistory({ history, onQuestionClick, onComponentAction }: ChatHistoryProps) {
-  console.log(
-    "[ChatHistory] Rendering with entries:",
-    history.map((e) => ({
-      id: e.id,
-      type: e.type,
-      chatId: e.chatId,
-      componentsCount: e.type === "assistant_response" ? e.components.length : 0,
-      streamingState: e.type === "assistant_response" ? e.streamingState : undefined,
-      // Check if Component is defined for each component
-      componentsWithComponent:
-        e.type === "assistant_response"
-          ? e.components.map((c: any) => ({
-              id: c.id,
-              hasComponent: !!c.Component,
-              componentType: c.componentType,
-            }))
-          : [],
-    }))
-  );
-
+export function ChatHistory({ history, onQuestionClick, onComponentAction, client }: ChatHistoryProps) {
+  // Empty state
   if (history.length === 0) {
     return (
       <div className={styles.emptyState}>
@@ -44,6 +32,7 @@ export function ChatHistory({ history, onQuestionClick, onComponentAction }: Cha
     );
   }
 
+  // Render history timeline (focus mode is handled at template level)
   return (
     <div className={styles.historyContainer}>
       {history.map((entry) => {
@@ -66,6 +55,7 @@ export function ChatHistory({ history, onQuestionClick, onComponentAction }: Cha
               response={entry}
               onQuestionClick={onQuestionClick}
               onComponentAction={onComponentAction}
+              client={client}
             />
           );
         }

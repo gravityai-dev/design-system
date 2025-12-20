@@ -4,6 +4,8 @@
  */
 
 export interface CardConfig {
+  /** Enable Focus Mode - allow component to expand as primary interaction surface */
+  focusable?: boolean;
   title?: string;
   description?: string;
   image?: string;

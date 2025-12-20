@@ -34,55 +34,108 @@ interface BookingWidgetProps {
   onCancel?: () => void;
   /** Whether the widget is in edit mode */
   editable?: boolean;
+  /** Is editing state (from Zustand) */
+  isEditing?: boolean;
+  /** Local booking data (from Zustand) */
+  localBooking?: BookingData;
+  /** Function to update Zustand state (injected by withZustandData HOC) */
+  updateData?: (updates: Record<string, any>) => void;
 }
 
 // Default healthcare image
 const DEFAULT_SERVICE_IMAGE = "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80";
 
+// Helper to normalize date/time formats
+function normalizeBookingData(data: BookingData): BookingData {
+  const normalized = { ...data };
+
+  // Convert human-readable date to YYYY-MM-DD format
+  if (normalized.date && !normalized.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    try {
+      const parsed = new Date(normalized.date);
+      if (!isNaN(parsed.getTime())) {
+        normalized.date = parsed.toISOString().split("T")[0];
+      }
+    } catch (e) {
+      // Keep original if parsing fails
+    }
+  }
+
+  // Convert 12-hour time to 24-hour HH:MM format
+  if (normalized.time && normalized.time.includes("M")) {
+    try {
+      const match = normalized.time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+      if (match) {
+        let hours = parseInt(match[1]);
+        const minutes = match[2];
+        const period = match[3].toUpperCase();
+
+        if (period === "PM" && hours !== 12) hours += 12;
+        if (period === "AM" && hours === 12) hours = 0;
+
+        normalized.time = `${hours.toString().padStart(2, "0")}:${minutes}`;
+      }
+    } catch (e) {
+      // Keep original if parsing fails
+    }
+  }
+
+  return normalized;
+}
+
 export default function BookingWidget(props: BookingWidgetProps) {
-  const { bookingData = {}, onBookingChange, onConfirm, onCancel, editable = true } = props;
+  const {
+    bookingData = {},
+    onBookingChange,
+    onConfirm,
+    onCancel,
+    editable = true,
+    isEditing: zustandIsEditing,
+    localBooking: zustandLocalBooking,
+    updateData,
+  } = props;
 
-  const [isEditing, setIsEditing] = useState(true);
-  const [localBooking, setLocalBooking] = useState<BookingData>(bookingData);
+  // Fallback state for Storybook (no Zustand available)
+  const [fallbackIsEditing, setFallbackIsEditing] = useState(true);
+  const [fallbackLocalBooking, setFallbackLocalBooking] = useState<BookingData>(() =>
+    normalizeBookingData(bookingData)
+  );
 
-  // Update local state when props change
+  // Use Zustand if available, otherwise fallback
+  const isEditing = zustandIsEditing ?? fallbackIsEditing;
+  const localBooking = zustandLocalBooking ?? fallbackLocalBooking;
+
+  // Wrapper functions that write to Zustand or fallback
+  const setIsEditing = (editing: boolean) => {
+    if (updateData) {
+      updateData({ isEditing: editing });
+    } else {
+      setFallbackIsEditing(editing);
+    }
+  };
+
+  const setLocalBooking = (booking: BookingData) => {
+    if (updateData) {
+      updateData({ localBooking: booking });
+    } else {
+      setFallbackLocalBooking(booking);
+    }
+  };
+
+  // Initialize Zustand state on first render if not already set
   useEffect(() => {
-    // Normalize date/time formats for HTML inputs
-    const normalized = { ...bookingData };
-
-    // Convert human-readable date to YYYY-MM-DD format
-    if (normalized.date && !normalized.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      try {
-        const parsed = new Date(normalized.date);
-        if (!isNaN(parsed.getTime())) {
-          normalized.date = parsed.toISOString().split("T")[0];
-        }
-      } catch (e) {
-        // Keep original if parsing fails
-      }
+    if (updateData && zustandIsEditing === undefined) {
+      const normalized = normalizeBookingData(bookingData);
+      updateData({ isEditing: true, localBooking: normalized });
     }
+  }, [updateData, zustandIsEditing, bookingData]);
 
-    // Convert 12-hour time to 24-hour HH:MM format
-    if (normalized.time && normalized.time.includes("M")) {
-      try {
-        const match = normalized.time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-        if (match) {
-          let hours = parseInt(match[1]);
-          const minutes = match[2];
-          const period = match[3].toUpperCase();
-
-          if (period === "PM" && hours !== 12) hours += 12;
-          if (period === "AM" && hours === 12) hours = 0;
-
-          normalized.time = `${hours.toString().padStart(2, "0")}:${minutes}`;
-        }
-      } catch (e) {
-        // Keep original if parsing fails
-      }
+  // Update fallback state when props change (for Storybook)
+  useEffect(() => {
+    if (!updateData) {
+      setFallbackLocalBooking(normalizeBookingData(bookingData));
     }
-
-    setLocalBooking(normalized);
-  }, [bookingData]);
+  }, [bookingData, updateData]);
 
   // Check if booking is confirmed
   const isConfirmed = localBooking.status === "confirmed";

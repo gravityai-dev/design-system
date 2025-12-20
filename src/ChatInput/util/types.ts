@@ -4,6 +4,8 @@
  */
 
 export interface ChatInputConfig {
+  /** Enable Focus Mode - allow component to expand as primary interaction surface */
+  focusable?: boolean;
   placeholder?: string;
   disabled?: boolean;
   enableAudio?: boolean;
