@@ -4,7 +4,25 @@
 
 import React from "react";
 import type { ResponseComponent } from "./types";
-import { FocusableWrapper } from "./FocusMode";
+import { FocusableWrapper } from "./focus";
+
+/**
+ * Format relative time for timestamps
+ */
+export function formatRelativeTime(date: string): string {
+  const now = new Date();
+  const messageDate = new Date(date);
+  const diffMs = now.getTime() - messageDate.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+
+  if (diffSec < 60) return "just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} min ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)} hr ago`;
+  if (messageDate.toDateString() === now.toDateString()) {
+    return messageDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return messageDate.toLocaleDateString();
+}
 
 /**
  * Check if component matches a type or category

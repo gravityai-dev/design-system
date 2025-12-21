@@ -78,6 +78,8 @@ export interface FocusState {
   targetTriggerNode: string | null;
   /** Chat ID to use when focused (same chatId = update existing component) */
   chatId: string | null;
+  /** Display name for the focused agent (from focusLabel config) */
+  agentName: string | null;
 }
 
 /**

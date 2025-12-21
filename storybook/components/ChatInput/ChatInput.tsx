@@ -21,6 +21,7 @@ export default function ChatInput({
   onFaqClick,
   onActionClick,
   onRecommendationClick,
+  focusContext,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>(null);
@@ -90,7 +91,7 @@ export default function ChatInput({
         <FaqSection faqs={faqs} onClose={() => setActiveTab(null)} onFaqClick={handleFaqClick} />
       )}
 
-      {showTabs && (
+      {showTabs && !focusContext?.isOpen && (
         <TabBar
           activeTab={activeTab}
           hasActions={hasActions}
@@ -109,9 +110,10 @@ export default function ChatInput({
         enableAudio={enableAudio}
         isRecording={isRecording}
         onMicrophoneClick={onMicrophoneClick}
+        focusContext={focusContext}
       />
     </div>
   );
 }
 
-export type { ChatInputProps, FAQ, Action, Recommendation, TabType } from "./types";
+export type { ChatInputProps, FAQ, Action, Recommendation, TabType, FocusContext } from "./types";

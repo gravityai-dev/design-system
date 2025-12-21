@@ -6,10 +6,10 @@
  * This template just needs to route messages correctly when focused.
  */
 
-import React, { useEffect, useRef, useMemo, useCallback } from "react";
-import { StreamingState, useFocusedComponent } from "../core";
+import React, { useMemo, useCallback } from "react";
+import { FocusLayout, ScrollableHistory, useStreamingState } from "../core";
 import ChatInput from "../../components/ChatInput";
-import { ChatHistory } from "../ChatLayout/components/ChatHistory";
+import { ChatHistory } from "./components/ChatHistory";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import type { SABChatLayoutProps } from "./types";
 import styles from "./SABChatLayout.module.css";
@@ -30,9 +30,6 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
   // Access history directly from client
   const history = client.history.entries;
 
-  // Focus Mode - use hook to get focused component (rendering at template level, outside scrollable area)
-  const { isFocusOpen, focusedComponent, closeFocus } = useFocusedComponent(history, client);
-
   // Wrap sendMessage to trigger streaming state
   // Focus mode routing is handled universally by GravityClient
   const sendMessage = useCallback(
@@ -43,15 +40,24 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
     [client, onStateChange]
   );
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  // Determine if we should show welcome screen (no messages yet)
+  const showWelcome = history.length === 0;
 
   // Check if any response is currently streaming
-  const isStreaming = useMemo(() => {
-    return history.some(
-      (entry) => entry.type === "assistant_response" && entry.streamingState === StreamingState.STREAMING
-    );
-  }, [history]);
+  const isStreaming = useStreamingState(history);
+
+  // Build focusContext from client.focusState
+  const focusContext = client?.focusState?.focusedComponentId
+    ? {
+        isOpen: true,
+        componentId: client.focusState.focusedComponentId,
+        agentName: client.focusState.agentName,
+        targetTriggerNode: client.focusState.targetTriggerNode,
+        close: client.closeFocus,
+      }
+    : { isOpen: false };
+
+  const isFocusOpen = focusContext.isOpen;
 
   // Get suggestions from client state (populated via SUGGESTIONS_UPDATE WebSocket event)
   const { faqs, actions, recommendations } = useMemo(() => {
@@ -63,35 +69,6 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
     };
   }, [client.suggestions]);
 
-  // Determine if we should show welcome screen (no messages yet)
-  const showWelcome = history.length === 0;
-
-  // Auto-scroll to bottom when history changes
-  useEffect(() => {
-    if (autoScroll && messagesEndRef.current && !showWelcome) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [history, autoScroll, showWelcome]);
-
-  // Auto-scroll when content updates (streaming)
-  useEffect(() => {
-    if (!autoScroll || !containerRef.current || showWelcome) return;
-
-    const observer = new MutationObserver(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-      }
-    });
-
-    observer.observe(containerRef.current, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-
-    return () => observer.disconnect();
-  }, [autoScroll, showWelcome]);
-
   return (
     <div className={styles.container}>
       <div className={styles.chatWindow}>
@@ -102,28 +79,15 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
           </div>
         </div>
 
-        {/* Messages area - Focus mode renders HERE at template level, outside scrollable area */}
-        <div ref={containerRef} className={`${styles.messagesArea} ${isFocusOpen ? styles.messagesAreaFocused : ""}`}>
-          {isFocusOpen && focusedComponent ? (
-            // Focus Mode: Render focused component expanded, filling the entire messages area
-            <div className={styles.focusContainer}>
-              <button onClick={() => closeFocus?.()} aria-label="Close focus mode" className={styles.focusCloseButton}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-              <div className={styles.focusContent}>
-                {focusedComponent.Component ? (
-                  <focusedComponent.Component
-                    {...focusedComponent.props}
-                    nodeId={focusedComponent.nodeId}
-                    chatId={focusedComponent.chatId}
-                  />
-                ) : null}
-              </div>
-            </div>
-          ) : (
-            // Normal Mode: Scrollable messages content
+        {/* Messages area - FocusLayout handles focus mode and keeps history mounted */}
+        <div className={styles.messagesArea}>
+          <FocusLayout
+            history={history}
+            client={client}
+            focusContainerClassName={styles.focusContainer}
+            closeButtonClassName={styles.focusCloseButton}
+          >
+            {/* Normal Mode: Scrollable messages content - ALWAYS MOUNTED by FocusLayout */}
             <div className={styles.messagesContent}>
               {showWelcome ? (
                 <WelcomeScreen
@@ -134,14 +98,18 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
                   onQuestionClick={sendMessage}
                 />
               ) : (
-                <div className={styles.messagesInner}>
-                  {/* ChatHistory renders history - focus mode handled at template level above */}
+                <ScrollableHistory
+                  history={history}
+                  enabled={autoScroll}
+                  skip={showWelcome}
+                  isFocusOpen={!!client?.focusState?.focusedComponentId}
+                  className={styles.messagesInner}
+                >
                   <ChatHistory history={history} onQuestionClick={sendMessage} client={client} />
-                  <div ref={messagesEndRef} />
-                </div>
+                </ScrollableHistory>
               )}
             </div>
-          )}
+          </FocusLayout>
         </div>
 
         {/* Input area */}
@@ -154,6 +122,7 @@ export default function SABChatLayout(props: SABChatLayoutProps) {
             faqs={isFocusOpen ? [] : faqs}
             actions={isFocusOpen ? [] : actions}
             recommendations={isFocusOpen ? [] : recommendations}
+            focusContext={focusContext}
           />
         </div>
       </div>

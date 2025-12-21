@@ -65,6 +65,17 @@ function generateConfigSchema(argTypes: Record<string, any>, storyDefaults?: Rec
     "ui:widget": "toggle",
   };
 
+  // Agent name shown in chat input when focused (only visible when focusable is true)
+  properties.focusLabel = {
+    type: "string",
+    title: "Focus Mode Label",
+    description: "Name shown in chat input when this component is focused (e.g., 'Bank Transfer')",
+    default: "",
+    "ui:dependencies": {
+      focusable: true,
+    },
+  };
+
   for (const [name, argType] of Object.entries(argTypes)) {
     // Skip props that are not workflow inputs (template-only props)
     // Only include props explicitly marked with workflowInput: true

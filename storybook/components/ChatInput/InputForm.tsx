@@ -4,6 +4,7 @@
 import React from "react";
 import { ChatBubbleIcon, MicrophoneIcon, StopIcon, SendIcon, SpinnerIcon } from "./icons";
 import styles from "./ChatInput.module.css";
+import type { FocusContext } from "./types";
 
 interface InputFormProps {
   value: string;
@@ -14,6 +15,7 @@ interface InputFormProps {
   enableAudio: boolean;
   isRecording: boolean;
   onMicrophoneClick?: () => void;
+  focusContext?: FocusContext;
 }
 
 export function InputForm({
@@ -25,13 +27,21 @@ export function InputForm({
   enableAudio,
   isRecording,
   onMicrophoneClick,
+  focusContext,
 }: InputFormProps) {
   return (
     <form onSubmit={onSubmit} className={styles.form}>
       <div className={styles.inputWrapper}>
-        <div className={styles.icon}>
-          <ChatBubbleIcon className={styles.iconSvg} />
-        </div>
+        {/* Focus Mode Pill OR Chat Icon */}
+        {focusContext?.isOpen ? (
+          <div className={styles.focusPillInline}>
+            <span className={styles.focusPillName}>{focusContext.agentName || "Assistant"}</span>
+          </div>
+        ) : (
+          <div className={styles.icon}>
+            <ChatBubbleIcon className={styles.iconSvg} />
+          </div>
+        )}
 
         <input
           type="text"
@@ -41,7 +51,7 @@ export function InputForm({
           disabled={disabled}
           className={`${styles.input} ${disabled ? styles.inputStreaming : ""} ${
             isRecording ? styles.inputRecording : ""
-          }`}
+          } ${focusContext?.isOpen ? styles.inputFocused : ""}`}
         />
 
         {enableAudio && (

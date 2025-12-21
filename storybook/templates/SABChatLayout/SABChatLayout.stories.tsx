@@ -65,3 +65,20 @@ export const Complete: Story = {
     ...SABChatLayoutDefaults,
   },
 };
+
+// Focus Mode - Component is focused, shows pill in input
+export const FocusMode: Story = {
+  args: {
+    client: {
+      ...mockClientComplete,
+      focusState: {
+        focusedComponentId: "comp-1",
+        targetTriggerNode: "inputtrigger6",
+        chatId: "chat-123",
+        agentName: "Bank Transfer",
+      },
+      closeFocus: () => console.log("[Mock] Close focus"),
+    },
+    ...SABChatLayoutDefaults,
+  },
+};

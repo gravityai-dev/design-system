@@ -4,30 +4,23 @@
  */
 
 // Types
-export {
-  StreamingState,
-  type ResponseComponent,
-  type UserMessage,
-  type AssistantResponse,
-  type HistoryEntry,
-  type SessionParams,
-  type FocusState,
-  type GravityClient,
-  type GravityTemplateProps,
-} from "./types";
+export { StreamingState, type ResponseComponent } from "./types";
+export * from "./types";
 
 // Hooks
 export { useGravityTemplate } from "./hooks";
+export { useAutoScroll } from "./useAutoScroll";
+export { useStreamingState } from "./useStreamingState";
+export { ScrollableHistory } from "./ScrollableHistory";
 
 // Helpers
-export { isComponentType, filterComponents, renderComponent } from "./helpers";
+export { renderComponent, filterComponents } from "./helpers";
 
 // Focus Mode
-export { FocusProvider, FocusOverlay, FocusableWrapper, useFocusMode } from "./FocusMode";
-export { withFocusMode, useFocusedComponent } from "./withFocusMode";
+export { FocusableWrapper, FocusLayout, useFocusedComponent, withFocusMode } from "./focus";
 
 // Mock client (for Storybook)
-export { createMockClient, createMockClients, type MockComponent } from "./mockClient";
+export { createMockClient, createMockClients } from "./mockClient";
 
 // Base class
-export { GravityTemplate, type GravityTemplateFn } from "./GravityTemplate";
+export { GravityTemplate } from "./GravityTemplate";

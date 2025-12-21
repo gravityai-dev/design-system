@@ -33,6 +33,15 @@ export function createNodeDefinition(): EnhancedNodeDefinition {
                   "default": false,
                   "ui:widget": "toggle"
             },
+            "focusLabel": {
+                  "type": "string",
+                  "title": "Focus Mode Label",
+                  "description": "Name shown in chat input when this component is focused (e.g., 'Bank Transfer')",
+                  "default": "",
+                  "ui:dependencies": {
+                        "focusable": true
+                  }
+            },
             "title": {
                   "type": "string",
                   "title": "Card title",

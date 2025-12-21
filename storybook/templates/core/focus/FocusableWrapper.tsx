@@ -1,16 +1,12 @@
 /**
- * Focus Mode - Universal component focus system
+ * FocusableWrapper - Wraps focusable components with expand button
  *
- * Provides FocusableWrapper for wrapping focusable components with expand button.
- * Used by renderComponent() in helpers.tsx.
+ * Used by renderComponent() in helpers.tsx to add expand icon to components
+ * that have focusable: true in their props.
  */
 
 import React from "react";
-import type { ResponseComponent } from "./types";
-
-// ============================================================
-// FOCUSABLE WRAPPER
-// ============================================================
+import type { ResponseComponent } from "../types";
 
 interface FocusableWrapperProps {
   /** The component data */
@@ -18,7 +14,12 @@ interface FocusableWrapperProps {
   /** The rendered component element */
   children: React.ReactNode;
   /** Callback to open focus mode (from client.openFocus) */
-  onOpenFocus?: (componentId: string, targetTriggerNode: string | null, chatId: string | null) => void;
+  onOpenFocus?: (
+    componentId: string,
+    targetTriggerNode: string | null,
+    chatId: string | null,
+    agentName?: string | null
+  ) => void;
 }
 
 /**
@@ -28,24 +29,22 @@ interface FocusableWrapperProps {
  * Uses client.openFocus callback for universal focus mode across all templates.
  */
 export function FocusableWrapper({ component, children, onOpenFocus }: FocusableWrapperProps) {
-  // Only focusable if component has focusable: true in props
   const isFocusable = component.props?.focusable === true;
 
   if (!isFocusable || !onOpenFocus) {
-    // Not focusable or no callback - render as-is
     return <>{children}</>;
   }
 
   const handleOpenFocus = () => {
     const targetTriggerNode = component.metadata?.targetTriggerNode || null;
     const chatId = component.chatId || null;
-    onOpenFocus(component.id, targetTriggerNode, chatId);
+    const agentName = component.props?.focusLabel || component.componentType || null;
+    onOpenFocus(component.id, targetTriggerNode, chatId, agentName);
   };
 
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
       {children}
-      {/* Expand button - overlays on top right of the component */}
       <button
         onClick={handleOpenFocus}
         aria-label="Expand component"
@@ -78,7 +77,6 @@ export function FocusableWrapper({ component, children, onOpenFocus }: Focusable
           e.currentTarget.style.transform = "scale(1)";
         }}
       >
-        {/* Expand icon */}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
         </svg>
@@ -86,3 +84,5 @@ export function FocusableWrapper({ component, children, onOpenFocus }: Focusable
     </div>
   );
 }
+
+export default FocusableWrapper;

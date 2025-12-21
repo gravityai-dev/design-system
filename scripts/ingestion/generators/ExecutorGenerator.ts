@@ -39,9 +39,12 @@ export default class ${metadata.name}Executor extends PromiseNode {
     // Include all defined props, even empty strings (for streaming text)
     const props: Record<string, any> = {};
     
-    // Always pass focusable (universal Focus Mode config)
+    // Always pass focusable and focusLabel (universal Focus Mode config)
     if (config.focusable !== undefined) {
       props.focusable = config.focusable;
+    }
+    if (config.focusLabel !== undefined) {
+      props.focusLabel = config.focusLabel;
     }
 ${Object.keys(metadata.argTypes)
   .map((key) => {

@@ -23,6 +23,22 @@ export interface Recommendation {
   actionLabel?: string;
 }
 
+/**
+ * Focus context passed to ChatInput when focus mode is active
+ */
+export interface FocusContext {
+  /** Whether focus mode is currently open */
+  isOpen: boolean;
+  /** ID of the focused component */
+  componentId?: string | null;
+  /** Display name for the focused agent */
+  agentName?: string | null;
+  /** Target trigger node for routing messages */
+  targetTriggerNode?: string | null;
+  /** Close focus mode */
+  close?: () => void;
+}
+
 export interface ChatInputProps {
   placeholder?: string;
   onSend?: (message: string) => void;
@@ -36,6 +52,8 @@ export interface ChatInputProps {
   onFaqClick?: (faq: string) => void;
   onActionClick?: (data: any) => void;
   onRecommendationClick?: (recommendation: Recommendation) => void;
+  /** Focus mode context - shows pill when isOpen is true */
+  focusContext?: FocusContext;
 }
 
 export type TabType = "actions" | "recommendations" | "faq" | null;

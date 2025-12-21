@@ -31,6 +31,15 @@ export function createNodeDefinition(): EnhancedNodeDefinition {
                   "description": "Allow this component to expand and become the primary interaction surface",
                   "default": false,
                   "ui:widget": "toggle"
+            },
+            "focusLabel": {
+                  "type": "string",
+                  "title": "Focus Mode Label",
+                  "description": "Name shown in chat input when this component is focused (e.g., 'Bank Transfer')",
+                  "default": "",
+                  "ui:dependencies": {
+                        "focusable": true
+                  }
             }
       },
       "required": []
